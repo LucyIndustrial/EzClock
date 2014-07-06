@@ -8,15 +8,10 @@
  be prototyped and debugged on an Arduino Uno.
  */
 
-/*
- * - TODO -
- *
+/* - TODO -
  * + Fix touch IRQ, check config registers, may have to do with Pull-up resistor
  * + Add set time code, etc.
  * + Add GMT offset code, etc.
- * + Remove gamma correction from minutes and seconds. One step is hidden b/c of
- *   the gamma table.
- *
  */
 
 /************
@@ -100,14 +95,14 @@
 
 #define F_MINSTART   24 // Which pixel does the minute start at?
 #define F_MINLEN     12 // The minute is 12 pixels long.
-#define F_MIN_R      90   // RGB values for the minutes
+#define F_MIN_R      40   // RGB values for the minutes
 #define F_MIN_G      0
 #define F_MIN_B      0
 
 #define F_SECSTART   24 // Which pixel is for seconds?
 #define F_SECLEN     12 // The seconds is 1 pixel long
 #define F_SEC_R      0   // RGB values for the seconds
-#define F_SEC_G      90
+#define F_SEC_G      40
 #define F_SEC_B      0
 
 #define F_SECLSTART  36 // Where is our center second LED
@@ -522,7 +517,7 @@ void showFaceMin(int t_min) {
   int scaledB = map(brightIndex, 0, 4, F_DEFAULT_B, F_MIN_B);
 
   // Set our color mask based
-  uint32_t cursorColor = face.Color(gamma[scaledR], gamma[scaledG], gamma[scaledB]);
+  uint32_t cursorColor = face.Color(scaledR, scaledG, scaledB);
 
 
   // Set "current" minute pixel
@@ -531,7 +526,7 @@ void showFaceMin(int t_min) {
 
   // Set previous minute pixels for fill-in effect.
   for (int i = x_minPix - 1; i >= 0; i--) {
-    face.setPixelColor(i + F_MINSTART, face.Color(gamma[F_MIN_R], gamma[F_MIN_G], gamma[F_MIN_B]) | face.getPixelColor(i + F_MINSTART));
+    face.setPixelColor(i + F_MINSTART, face.Color(F_MIN_R, F_MIN_G, F_MIN_B) | face.getPixelColor(i + F_MINSTART));
 
   }
 }
@@ -550,7 +545,7 @@ void showFaceSec(int t_sec) {
   int scaledB = map(brightIndex, 0, 4, F_DEFAULT_B, F_SEC_B);
 
   // Set our color mask based
-  uint32_t cursorColor = face.Color(gamma[scaledR], gamma[scaledG], gamma[scaledB]);
+  uint32_t cursorColor = face.Color(scaledR, scaledG, scaledB);
 
 
   // Set "current" minute pixel
@@ -559,7 +554,7 @@ void showFaceSec(int t_sec) {
 
   // Set previous minute pixels for fill-in effect.
   for (int i = x_secPix - 1; i >= 0; i--) {
-    face.setPixelColor(i + F_SECSTART, face.Color(gamma[F_SEC_R], gamma[F_SEC_G], gamma[F_SEC_B]) | face.getPixelColor(i + F_SECSTART));
+    face.setPixelColor(i + F_SECSTART, face.Color(F_SEC_R, F_SEC_G, F_SEC_B) | face.getPixelColor(i + F_SECSTART));
 
   }
 }
