@@ -47,11 +47,13 @@
 #define T_KEY7       0x40
 #define T_KEY8       0x80
 
-// Touch sensor IRQ pin
+// Touch sensor IRQ config
 #ifdef USINGFLORA
-  #define T_IRQPIN   9
+  #define T_IRQPIN   0 // The Flora uses the "RX" pin for the IRQ
+  #define T_IRQ      2 // Which is IRQ #2
 #else
-  #define T_IRQPIN   2
+  #define T_IRQPIN   2 // The Uno uses D2 for the IRQ
+  #define T_IRQ      0 // Which is IRQ #0
 #endif
 
 // ChronoDot 2.0/DS3231 RTC config
@@ -59,9 +61,11 @@
 
 // ChronoDot RTC SQW/IRQ pin
 #ifdef USINGFLORA
-  #define R_IRQPIN   10
+  #define R_IRQPIN   1 // The Flora uses the "TX" pin for the IRQ
+  #define R_IRQ      3 // Which is IRQ #3
 #else
-  #define R_IRQPIN   3
+  #define R_IRQPIN   3 // The Uno uses D3 for the IRQ
+  #define R_IRQ      1 // Which is IRQ #1
 #endif
 
 // Turn this LED off after boot.
@@ -193,7 +197,7 @@ void setup() {
 pinMode(INDLED, OUTPUT);
 
 // Turn on the onboard LED to show we're setting up.
-digitalWrite(INDLED, LOW);
+digitalWrite(INDLED, HIGH);
 
 #ifdef DEBUGON
   // Configure serial internface
@@ -255,8 +259,8 @@ if (!rtc.isrunning()) {
   configRTC();
 
   // Set our interrupts.
-  attachInterrupt(0, setTIrqFlag, FALLING); // Touch
-  attachInterrupt(1, setRIrqFlag, FALLING); // RTC
+  attachInterrupt(T_IRQ, setTIrqFlag, FALLING); // Touch
+  attachInterrupt(R_IRQ, setRIrqFlag, FALLING); // RTC
 
   //Start the clock face up, and it will be zeroed out.
   face.begin();
