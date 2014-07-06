@@ -14,6 +14,8 @@
  * + Fix touch IRQ, check config registers, may have to do with Pull-up resistor
  * + Add set time code, etc.
  * + Add GMT offset code, etc.
+ * + Remove gamma correction from minutes and seconds. One step is hidden b/c of
+ *   the gamma table.
  *
  */
 
