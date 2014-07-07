@@ -9,15 +9,20 @@
  */
 
 /* - TODO -
- * + Fix touch IRQ, check config registers, may have to do with Pull-up resistor
- * + Add set time code, etc.
- * + Add GMT offset code, etc.
+ * + Fix touch IRQ, check config registers, may have to do with pull-up resistor?
+ * + Implement code to set RTC from menu options.
+ * + Implement RTC GMT offset for default and secondary time zones.
+ * + Implement GMT storage for both time zones in EEPROM for persistence across
+ *   reboots.
+ * + Implement GMT offset that allows the setting of hours and minutes for both
+ *   time zones.
  */
 
 /************
  * INCLUDES *
  ************/
 
+#include <EEPROM.h> // Onboard EEPROM storage of both time zones.
 #include <Wire.h> // I2C support for RTC and cap touch sensor
 #include <SPI.h> // Required for CAP1188 touch sensor, but not used.
 #include <RTC_DS3231.h> // Load a lib for our specific RTC chip.
@@ -88,7 +93,7 @@
 #define F_HR_MARK_G  90
 #define F_HR_MARK_B  0
 
-// Configure hours stuff.
+// Configure hours display stuff.
 #define F_HRSTART    0  // Which pixel does the hour start at?
 #define F_HRLEN      24 // The hour is 24 pixels long.
 #define F_HR_R       0  // RGB values for the hour
@@ -96,19 +101,21 @@
 #define F_HR_B       90
 #define F_HR_TRLEN   6   // Add a 6-pixel trail behind the current hour pixel.
 
-
+// Configure mintues display stuff.
 #define F_MINSTART   24 // Which pixel does the minute start at?
 #define F_MINLEN     12 // The minute is 12 pixels long.
 #define F_MIN_R      40   // RGB values for the minutes
 #define F_MIN_G      0
 #define F_MIN_B      0
 
+// Display seconds display stuff.
 #define F_SECSTART   24 // Which pixel is for seconds?
 #define F_SECLEN     12 // The seconds is 1 pixel long
 #define F_SEC_R      0   // RGB values for the seconds
 #define F_SEC_G      40
 #define F_SEC_B      0
 
+// This config is for the seconds "pulse" LED/pixel.
 #define F_SECLSTART  36 // Where is our center second LED
 #define F_SECL_DELAY 10 // How long do we wait before dimming again?
 #define F_SECL_STEP  10 // How many dimming steps do we have?
@@ -127,6 +134,14 @@
 #else
   #define F_DATAPIN  4
 #endif
+
+// EEPROM timezone data storage addresses (each int will be 2 bytes long)
+#define TZ_A_ID      0 // GMT offset/timezone A's identifier
+#define TZ_B_ID      1 // GMT offset/timezone B's identifier
+#define EEP_TZ_HR_A  0 // GMT offset/timezone A, offset in hours, signed int.
+#define EEP_TZ_MIN_A 2 // GMT offset/timezone A, offset in minutes, signed int.
+#define EEP_TZ_HR_B  4 // GMT offset/timezone B, offset in hours, signed int.
+#define EEP_TZ_MIN_B 6 // GMT offset/timezone B, offset in minutes, signed int.
 
 
 /***********
@@ -183,9 +198,11 @@ uint32_t hrMarkColor = face.Color(gamma[F_HR_MARK_R], gamma[F_HR_MARK_G], gamma[
 uint32_t faceDefColor = face.Color(gamma[F_DEFAULT_R], gamma[F_DEFAULT_G], gamma[F_DEFAULT_B]);
 
 // Global timekeeping
-int r_hr;
-int r_min;
-int r_sec;
+int r_hr; // Global hour value from RTC. (Shoudld be in GMT / UTC)
+int r_min; // Global minute value from RTC. (Shoudld be in GMT / UTC)
+int r_sec; // Global second value from RTC. (Shoudld be in GMT / UTC)
+int tz_a[] = {0, 0}; // Time zone/GMT offset A global value
+int tz_b[] = {0, 0}; // Time zone/GMT offset B global value
 
 /*******************************
  * ARDUINO SETUP AND MAIN LOOP *
@@ -257,6 +274,8 @@ if (!rtc.isrunning()) {
   configTouch();
   // Configure realtime clock.
   configRTC();
+  // Configure time zones.
+  configTZ();
 
   // Set our interrupts.
   attachInterrupt(T_IRQ, setTIrqFlag, FALLING); // Touch
@@ -627,6 +646,28 @@ void getRTCTime() {
 #endif
 }
 
+// Get the stored values in EEPROM for time zone offset
+void getTZ(int t_tzID, int t_tzDatArray[]) {
+  // For now we store and return a dummy value.
+  
+  // Set our GMT offset in hours and minutes to zero
+  // since we're prototyping on local time for now.
+  t_tzDatArray[0] = 0;
+  t_tzDatArray[1] = 0;
+  
+  // Supposedly this should work (via http://forum.arduino.cc/index.php?topic=40644.0)
+}
+
+// Set the stored values in EEPROM for time zone A's offset
+void setTZ(int t_tzID, int t_offsetHrs, int t_offsetMins) {
+  // Dummy function, do nothing until implemented.
+}
+
+// This is called on boot to grab the timezone from EEPROM.
+void configTZ() {
+  getTZ(TZ_A_ID, tz_a);
+  getTZ(TZ_B_ID, tz_b);
+}
 
 /**********************************
  * DEVICE CONFIGURATION FUNCTIONS *
@@ -660,6 +701,7 @@ void configRTC() {
   // Set our IRQ frequency at 1Hz (one pulse per second)
   rtc.SQWFrequency(RTC_SQW_FREQ);
 }
+
 
 /**********************
  * INTERRUPT HANDLERS *
