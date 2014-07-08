@@ -6,8 +6,16 @@
  This code is designed for an Adafruit Flora using a ChronoDot 2.1 RTC,
  Adafruit CAP1188 touch sensor, and Adafruit NeoPixels, but is set up to
  be prototyped and debugged on an Arduino Uno.
+ 
+ This project's source can be found on GitHub at https://github.com/LucyIndustrial/EzClock/
  */
-
+ 
+/* 
+  To build the code for a test envrionment you can uncomment the
+  #define DEBUGON line, and if you're testing against an Arduino
+  Uno, you can comment out the #define USINGFLORA line.
+*/
+ 
 /* - TODO -
  * + Implement code to set RTC from menu options.
  * + Finish RTC GMT offset for default and secondary time zones.
