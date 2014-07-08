@@ -489,7 +489,7 @@ void drawClockFace() {
 // Show hour ticks at 0:00, 6:00, 12:00, and 18:00 hour marks
 void showFaceHrMarks(uint32_t t_color) {
   #ifdef DEBUGON
-    Serial.println("Insert hour marks.");
+    Serial.println("Create 6-hour marks.");
   #endif
   face.setPixelColor(0, t_color);
   face.setPixelColor(6, t_color);
