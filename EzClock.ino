@@ -202,8 +202,8 @@ uint32_t faceDefColor = face.Color(gamma[F_DEFAULT_R], gamma[F_DEFAULT_G], gamma
 int r_hr; // Global hour value from RTC. (Shoudld be in GMT / UTC)
 int r_min; // Global minute value from RTC. (Shoudld be in GMT / UTC)
 int r_sec; // Global second value from RTC. (Shoudld be in GMT / UTC)
-int tz_a[] = {0, 0}; // Time zone/GMT offset A global value
-int tz_b[] = {0, 0}; // Time zone/GMT offset B global value
+int tz_a[] = {-12, -60}; // Time zone/GMT offset A global value (use a bogus value)
+int tz_b[] = {-13, -61}; // Time zone/GMT offset B global value (use a bogus value)
 
 /*******************************
  * ARDUINO SETUP AND MAIN LOOP *
