@@ -208,41 +208,44 @@ int tz_b[] = {0, 0}; // Time zone/GMT offset B global value
 
 // System setup method
 void setup() {
-// Set up our diagnostic indicator LED
-pinMode(INDLED, OUTPUT);
+  // Set up our diagnostic indicator LED
+  pinMode(INDLED, OUTPUT);
 
-// Turn on the onboard LED to show we're setting up.
-digitalWrite(INDLED, HIGH);
+  // Turn on the onboard LED to show we're setting up.
+  digitalWrite(INDLED, HIGH);
 
-#ifdef DEBUGON
-  // Configure serial internface
-  Serial.begin(115200);
-  Serial.println("In setup()...");
-
-#endif
-
-#ifdef DEBUGON
-  Serial.println("Init I2C...");
-#endif
-
-// Start our I2C bus.
-Wire.begin();
-
-#ifdef DEBUGON
-  Serial.println("Init RTC...");
-#endif
-
-// Spin the RTC up.
-rtc.begin();
-
-// Check our clock to see if it's running.
-if (!rtc.isrunning()) {
   #ifdef DEBUGON
-    Serial.println("RTC not running...");
+    // Configure serial internface
+    Serial.begin(115200);
+    Serial.println("In setup()...");
   #endif
-} else {
-  Serial.println("RTC running...");
-}
+
+  #ifdef DEBUGON
+    Serial.println("Init I2C...");
+  #endif
+
+  // Start our I2C bus.
+  Wire.begin();
+
+  #ifdef DEBUGON
+    Serial.println("Init RTC...");
+  #endif
+
+  // Spin the RTC up.
+  rtc.begin();
+
+  // Check our clock to see if it's running.
+  // in case the RTC ran out of battery or reset
+  // we don't want to stop the startup process.
+  // Since this has no consequence unless we're
+  // debugging only do this check when debugging.
+  #ifdef DEBUGON
+    if (!rtc.isrunning()) {
+      Serial.println("RTC not running...");
+    } else {
+      Serial.println("RTC running...");
+    }
+  #endif
 
   #ifdef DEBUGON
     // Set up the touch sensor
@@ -296,13 +299,12 @@ void loop() {
 
   // Check to see if we got an IRQ from the RTC.
   if (checkRIRQ()) {
-    
-    // Clear the IRQ flag since we're handling it now.
-    clearRIRQ();
-
     #ifdef DEBUGON
       Serial.println("Got RTC IRQ.");
     #endif
+        
+    // Clear the IRQ flag since we're handling it now.
+    clearRIRQ();
    
     // Get the new time value from the RTC.
     getRTCTime();
@@ -314,18 +316,16 @@ void loop() {
 
   // Do we have a touch IRQ?
   if (checkTIRQ()) {
-
+    // Debug
+    #ifdef DEBUGON
+      Serial.println("Got touch IRQ.");
+    #endif
+    
     // Grab the state of the touched keys before clearing the IRQ.
     uint8_t touched = getTouched();
 
     // Clear the touch IRQ since we're handling it now.
     clearTIRQ();
-
-    // Debug
-    #ifdef DEBUGON
-      Serial.println("Got touch IRQ.");
-      Serial.println(touched, HEX);
-    #endif
 
     // Handle the keys touched by the user.
     handleMain(touched);
