@@ -447,6 +447,7 @@ void handleLight() {
   setFaceRange(F_MINSTART, (F_MINSTART + F_MINLEN) - 1, 0, 0, 0);
   delay(F_LIGHT_DLY);
   setFaceRange(F_HRSTART, F_HRLEN - 1, 0, 0, 0);
+  delay(F_LIGHT_DLY);
   
   #ifdef DEBUGON
     Serial.println("Done lighting.");
