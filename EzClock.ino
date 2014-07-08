@@ -784,7 +784,7 @@ void loadTZ(int t_tzID, int t_tzDatArray[]) {
   }
 
   #ifdef DEBUGON
-    Serial.print("Got time zone ");
+    Serial.print("Loaded time zone ");
     Serial.print(t_tzID);
     Serial.print(" as GMT ");
     Serial.print(t_tzDatArray[0]);
