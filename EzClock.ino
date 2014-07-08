@@ -438,13 +438,13 @@ void handleLight() {
   }
 
   // Wind-down animation
-  face.setPixelColor(F_SECLSTART, F_DEFAULT_R, F_DEFAULT_G, F_DEFAULT_G);
+  face.setPixelColor(F_SECLSTART, F_DEFAULT_R, F_DEFAULT_G, F_DEFAULT_B);
   face.show();
   delay(F_LIGHT_DLY);
-  setFaceRange(F_MINSTART, (F_MINSTART + F_MINLEN) - 1, F_DEFAULT_R, F_DEFAULT_G, F_DEFAULT_G);
+  setFaceRange(F_MINSTART, (F_MINSTART + F_MINLEN) - 1, F_DEFAULT_R, F_DEFAULT_G, F_DEFAULT_B);
   face.show();
   delay(F_LIGHT_DLY);
-  setFaceRange(F_HRSTART, F_HRLEN - 1, F_DEFAULT_R, F_DEFAULT_G, F_DEFAULT_G);
+  setFaceRange(F_HRSTART, F_HRLEN - 1, F_DEFAULT_R, F_DEFAULT_G, F_DEFAULT_B);
   face.show();
   delay(F_LIGHT_DLY);
 
