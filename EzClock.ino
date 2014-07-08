@@ -436,19 +436,22 @@ void handleLight() {
       face.show();
     }
   }
- 
-  // Reset our counter.
-  currentStep = 0;
 
   // Wind-down animation
   face.setPixelColor(F_SECLSTART, F_DEFAULT_R, F_DEFAULT_G, F_DEFAULT_G);
   face.show();
   delay(F_LIGHT_DLY);
-  setFaceRange(F_MINSTART, (F_MINSTART + F_MINLEN) - 1, 0, 0, 0);
+  setFaceRange(F_MINSTART, (F_MINSTART + F_MINLEN) - 1, F_DEFAULT_R, F_DEFAULT_G, F_DEFAULT_G);
+  face.show();
   delay(F_LIGHT_DLY);
-  setFaceRange(F_HRSTART, F_HRLEN - 1, 0, 0, 0);
+  setFaceRange(F_HRSTART, F_HRLEN - 1, F_DEFAULT_R, F_DEFAULT_G, F_DEFAULT_G);
+  face.show();
   delay(F_LIGHT_DLY);
-  
+
+
+  // Reset our counter.
+  currentStep = 0;
+
   #ifdef DEBUGON
     Serial.println("Done lighting.");
   #endif
