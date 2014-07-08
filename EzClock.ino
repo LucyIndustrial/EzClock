@@ -310,7 +310,7 @@ void loop() {
     clearRIRQ();
 
     #ifdef DEBUGON
-      Serial.println("Tick, tock.");
+      Serial.println("Got RTC IRQ.");
     #endif
    
     // Get the new time value from the RTC.
@@ -755,12 +755,35 @@ void loadTZ(int t_tzID, int t_tzDatArray[]) {
       // The default behavior is to just read the first address set.
       h_addr = EEP_TZ_HR_A;
       m_addr = EEP_TZ_MIN_A;
+      t_tzID = 0;
       break;
   }
   
   // Read time zone data at the specified addresses.
   t_tzDatArray[0] = EEPROM.read(h_addr);
   t_tzDatArray[1] = EEPROM.read(m_addr);
+  
+  // Do a quick boundary check for our read values, and if they're not
+  // right due to uninitialized EEPROM or previously written EEPROM
+  // data reset them.
+  if(t_tzDatArray[0] > 11 | t_tzDatArray[0] < -11 | t_tzDatArray[1] > 59 | t_tzDatArray[1] < -59) {
+    #ifdef DEBUGON
+      Serial.print("Got invalid time zone data for ID ");
+      Serial.print(t_tzID);
+      Serial.print(" - ");
+      Serial.print(t_tzDatArray[0]);
+      Serial.print(":");
+      Serial.println(t_tzDatArray[1]);
+      Serial.println("Saving GMT in place of previous value.");
+    #endif
+
+    // Set our system-wide time zone to GMT.
+    t_tzDatArray[0] = 0;
+    t_tzDatArray[1] = 0;
+    
+    // And write GMT as the offset to EEPROM so next time we have good data.
+    saveTZ(t_tzID, 0, 0);
+  }
 
   #ifdef DEBUGON
     Serial.print("Got time zone ");
