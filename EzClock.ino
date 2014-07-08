@@ -9,9 +9,8 @@
  */
 
 /* - TODO -
- * + Fix touch IRQ, check config registers, may have to do with pull-up resistor?
  * + Implement code to set RTC from menu options.
- * + Implement RTC GMT offset for default and secondary time zones.
+ * + Finish RTC GMT offset for default and secondary time zones.
  * + Implement GMT storage for both time zones in EEPROM for persistence across
  *   reboots.
  * + Implement GMT offset that allows the setting of hours and minutes for both
@@ -316,11 +315,12 @@ void loop() {
 
   // Do we have a touch IRQ?
   if (t_IrqFlag) {
-    // Clear the IRQ flag since we're handling it now.
-    t_IrqFlag = 0;
 
-    // Grab the state of the touched keys.
-    uint8_t touched = cap.touched();
+    // Grab the state of the touched keys before clearing the IRQ.
+    uint8_t touched = getTouched();
+
+    // Clear the touch IRQ since we're handling it now.
+    clearTIRQ();
 
     // Debug
     #ifdef DEBUGON
@@ -646,6 +646,21 @@ void getRTCTime() {
 #endif
 }
 
+// Get out touched keys.
+uint8_t getTouched() {
+  // Grab the touched keys from the sensor.
+  uint8_t touched = cap.touched();
+
+  #ifdef DEBUGON
+    Serial.print("Got touched keys: ");
+    Serial.println(touched, HEX);
+  #endif
+  
+  
+  // Return the keys touched.
+  return touched;
+}
+
 // Get the stored values in EEPROM for time zone offset
 void getTZ(int t_tzID, int t_tzDatArray[]) {
   // For now we store and return a dummy value.
@@ -654,17 +669,38 @@ void getTZ(int t_tzID, int t_tzDatArray[]) {
   // since we're prototyping on local time for now.
   t_tzDatArray[0] = 0;
   t_tzDatArray[1] = 0;
-  
+
+  #ifdef DEBUGON
+    Serial.print("Got time zone ");
+    Serial.print(t_tzID);
+    Serial.print(" as GMT ");
+    Serial.print(t_tzDatArray[0]);
+    Serial.print(":");
+    Serial.println(t_tzDatArray[1]);
+  #endif
+
   // Supposedly this should work (via http://forum.arduino.cc/index.php?topic=40644.0)
 }
 
 // Set the stored values in EEPROM for time zone A's offset
 void setTZ(int t_tzID, int t_offsetHrs, int t_offsetMins) {
   // Dummy function, do nothing until implemented.
+  #ifdef DEBUGON
+    Serial.print("Setting time zone ");
+    Serial.print(t_tzID);
+    Serial.print(" as GMT ");
+    Serial.print(t_offsetHrs);
+    Serial.print(":");
+    Serial.println(t_offsetMins);
+  #endif
 }
 
 // This is called on boot to grab the timezone from EEPROM.
 void configTZ() {
+  #ifdef DEBUGON
+    Serial.println("Configuring time zones...");
+  #endif
+  
   getTZ(TZ_A_ID, tz_a);
   getTZ(TZ_B_ID, tz_b);
 }
@@ -680,6 +716,7 @@ void configTouch() {
 #endif
 
   // Configure the necessary registers.
+  cap.writeRegister(0x00, 0x00); // Set main config register to make sure everything is zero, including the INT bit.
   cap.writeRegister(0x27, 0xFF); // Activate IRQ for all touch channels!
   cap.writeRegister(0x28, 0x00); // Turn off interrupt on hold.
   cap.writeRegister(0x2A, 0x00); // Allow multiple touches because the diagnostic LEDs look cool.
@@ -711,6 +748,20 @@ void configRTC() {
 void setTIrqFlag() {
   // Set the flag
   t_IrqFlag = 1;
+}
+
+// Clear the touch IRQ flag and reset the IRQ on the sensor.
+void clearTIRQ() {
+    #ifdef DEBUGON
+      Serial.println("Clearing touch IRQ.");
+    #endif
+  
+  // Clear the flag.
+  t_IrqFlag = 0;
+  
+  // Clear the INT bit on the main configuration register,
+  // leaving the rest of the register in tact.
+  cap.writeRegister(0x00, cap.readRegister(0x00) & 0xFE);
 }
 
 // Set our RTC IRQ flag.
