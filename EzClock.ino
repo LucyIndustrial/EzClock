@@ -202,12 +202,16 @@ uint32_t faceDefColor = face.Color(gamma[F_DEFAULT_R], gamma[F_DEFAULT_G], gamma
 int r_hr; // Global hour value from RTC. (Shoudld be in GMT / UTC)
 int r_min; // Global minute value from RTC. (Shoudld be in GMT / UTC)
 int r_sec; // Global second value from RTC. (Shoudld be in GMT / UTC)
+
 int tz_a[] = {-12, -60}; // Time zone/GMT offset A global value (use a bogus value)
 int tz_b[] = {-13, -61}; // Time zone/GMT offset B global value (use a bogus value)
-int currentTz[] = tz_a; // Setting the default time zone with the data for time zone A.
+int currentTz[] = {-100, -100}; // This will store the current time zone (use a bogus value)
+
 int f_secl_r = F_SECL_TZA_R; // Set the default second RGB values to reflect that we're using time zone A at startup.
 int f_secl_g = F_SECL_TZA_G;
 int f_secl_b = F_SECL_TZA_B;
+
+
 /*******************************
  * ARDUINO SETUP AND MAIN LOOP *
  *******************************/
@@ -283,6 +287,11 @@ void setup() {
   configRTC();
   // Configure time zones.
   configTZ();
+
+  // Since we have our time zone values we should set
+  // the current time zone to the default time zone.
+  currentTz[0] = tz_a[0];
+  currentTz[1] = tz_a[1];
 
   // Set our interrupts.
   attachInterrupt(T_IRQ, setTIrqFlag, FALLING); // Touch
