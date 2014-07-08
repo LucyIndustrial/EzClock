@@ -5,7 +5,7 @@ This is a clock project written for Arduino uCs, with a Creative Commons 4.0 Att
 
 Features:
  - Clock code is open source with a simple Creative Commons 4.0 Attribution license.
- - LED clock face
+ - RGB LED clock face
  - Minutes and seconds are displayed like a circular progress bar or gauge
  - Flash as each second passes
  - Features dual independently-configured time zones, configured as GMT offsets
