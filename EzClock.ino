@@ -318,7 +318,7 @@ void loop() {
   if (checkTIRQ()) {
     // Debug
     #ifdef DEBUGON
-      Serial.println("Got touch IRQ.");
+      Serial.println("Got touch IRQ in loop().");
     #endif
     
     // Grab the state of the touched keys before clearing the IRQ.
@@ -340,7 +340,7 @@ void loop() {
 // Let's do the main menu thing.
 void handleMain(int t_touched) {
   #ifdef DEBUGON
-    Serial.println("Handling touched key.");
+    Serial.println("Handling touched key in handleMain().");
   #endif
   
   // What was touched?
@@ -642,6 +642,10 @@ void showSecFlash() {
     // touch commands may not register, so we should make sure we're dealing
     // with them.
     if(checkTIRQ()) {
+      #ifdef DEBUGON
+        Serial.println("Got touch IRQ in showSecFlash().");
+      #endif
+      
       // Grab the state of the touched keys before clearing the IRQ.
       uint8_t touched = getTouched();
             
