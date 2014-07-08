@@ -401,18 +401,26 @@ void handleLight() {
   int lightSteps[] = {F_LIGHT_A, F_LIGHT_B, F_LIGHT_C};
 
   // Start-up animation
+  setFaceRange(0, F_LENGTH -1, F_DEFAULT_R, F_DEFAULT_G, F_DEFAULT_G);
+  face.show();
+  delay(F_LIGHT_DLY);
   face.setPixelColor(F_SECLSTART, gamma[lightSteps[currentStep]], gamma[lightSteps[currentStep]], gamma[lightSteps[currentStep]]);
   face.show();
   delay(F_LIGHT_DLY);
-  setFaceRange(F_MINSTART, F_MINLEN - 1, gamma[lightSteps[currentStep]], gamma[lightSteps[currentStep]], gamma[lightSteps[currentStep]]);
+  setFaceRange(F_MINSTART, (F_MINSTART + F_MINLEN) - 1, gamma[lightSteps[currentStep]], gamma[lightSteps[currentStep]], gamma[lightSteps[currentStep]]);
+  face.show();
   delay(F_LIGHT_DLY);
   setFaceRange(F_HRSTART, F_HRLEN - 1, gamma[lightSteps[currentStep]], gamma[lightSteps[currentStep]], gamma[lightSteps[currentStep]]);
-
+  face.show();
+  delay(F_LIGHT_DLY);
 
   // Go until we've looped through all possible values.
-  while(currentStep < 3) {
+  while(currentStep <= 2) {
     // If the IRQ
     if (t_IrqFlag) {
+      // Clear the touch IRQ since we're handling it now.
+      clearTIRQ();
+      
       #ifdef DEBUGON
         Serial.println("Light step up.");
       #endif
@@ -423,9 +431,9 @@ void handleLight() {
       // Set the light step, 0 for off, 2 for brightest.
       currentStep++;
 
-      // Wind-down animation
+      // Set the step.
       setFaceRange(0, F_LENGTH - 1, gamma[lightSteps[currentStep]], gamma[lightSteps[currentStep]], gamma[lightSteps[currentStep]]);
-      delay(50);
+      face.show();
     }
   }
  
@@ -433,10 +441,10 @@ void handleLight() {
   currentStep = 0;
 
   // Wind-down animation
-  face.setPixelColor(F_SECSTART, 0, 0, 0);
+  face.setPixelColor(F_SECLSTART, F_DEFAULT_R, F_DEFAULT_G, F_DEFAULT_G);
   face.show();
   delay(F_LIGHT_DLY);
-  setFaceRange(F_MINSTART, F_MINLEN - 1, 0, 0, 0);
+  setFaceRange(F_MINSTART, (F_MINSTART + F_MINLEN) - 1, 0, 0, 0);
   delay(F_LIGHT_DLY);
   setFaceRange(F_HRSTART, F_HRLEN - 1, 0, 0, 0);
   
