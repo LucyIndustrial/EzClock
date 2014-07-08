@@ -842,7 +842,7 @@ void saveTZ(int t_tzID, int t_offsetHrs, int t_offsetMins) {
   }
   
   #ifdef DEBUGON
-    Serial.print("Got time zone ");
+    Serial.print("Saved time zone ");
     Serial.print(t_tzID);
     Serial.print(" as GMT ");
     Serial.print(t_offsetHrs);
@@ -857,9 +857,31 @@ void configTZ() {
     Serial.println("Configuring time zones...");
   #endif
   
+  #ifdef DEBUGON
+    Serial.print("Global time zone ID 0 is now GMT ");
+    Serial.print(tz_a[0]);
+    Serial.print(":");
+    Serial.println(tz_a[1]);
+    Serial.print("Global time zone ID 1 is now GMT ");
+    Serial.print(tz_b[0]);
+    Serial.print(":");
+    Serial.println(tz_b[1]);
+  #endif
+
   // Grab both time zone values from EEPROM, and set tz_a and tz_b with them.
   loadTZ(TZ_A_ID, tz_a);
   loadTZ(TZ_B_ID, tz_b);
+  
+  #ifdef DEBUGON
+    Serial.print("Global time zone ID 0 is now GMT ");
+    Serial.print(tz_a[0]);
+    Serial.print(":");
+    Serial.println(tz_a[1]);
+    Serial.print("Global time zone ID 1 is now GMT ");
+    Serial.print(tz_b[0]);
+    Serial.print(":");
+    Serial.println(tz_b[1]);
+  #endif
 }
 
 /**********************************
