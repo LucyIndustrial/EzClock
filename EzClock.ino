@@ -420,10 +420,6 @@ void handleLight() {
       delay(50);
     }
   }
-
-  #ifdef DEBUGON
-    Serial.println("Done lighting.");
-  #endif
  
   // Reset our counter.
   currentStep = 0;
@@ -435,6 +431,10 @@ void handleLight() {
   setFaceRange(F_MINSTART, F_MINLEN - 1, 0, 0, 0);
   delay(F_LIGHT_DLY);
   setFaceRange(F_HRSTART, F_HRLEN - 1, 0, 0, 0);
+  
+  #ifdef DEBUGON
+    Serial.println("Done lighting.");
+  #endif
 }
 
 
@@ -446,10 +446,13 @@ void showClockFace() {
   // Seconds will be an interrupt-driven animation
   // so they don't show up here.
   
+  #ifdef DEBUGON
+    Serial.println("Updating clock face.");
+  #endif
+  
   // Blank the clock.
   setFaceColor(faceDefColor);
-
- 
+  
   // Display hour marks.
   showFaceHrMarks(hrMarkColor);
   // Display our hours
@@ -475,6 +478,9 @@ void drawClockFace() {
 
 // Show hour ticks at 0:00, 6:00, 12:00, and 18:00 hour marks
 void showFaceHrMarks(uint32_t t_color) {
+  #ifdef DEBUGON
+    Serial.println("Insert hour marks.");
+  #endif
   face.setPixelColor(0, t_color);
   face.setPixelColor(6, t_color);
   face.setPixelColor(12, t_color);
@@ -485,7 +491,10 @@ void showFaceHrMarks(uint32_t t_color) {
 void showFaceHr(int t_hr) {
   // Store the target pixel for the hour trail.
   int x_tgt;
-
+  
+  #ifdef DEBUGON
+    Serial.println("Create hour marks.");
+  #endif
  
   // Figure out how to add a cool trail to the hour.
   //face.setPixelColor(t_hr, face.Color(gamma[F_HR_R], gamma[F_HR_G], gamma[F_HR_B]) | face.getPixelColor(t_hr));
@@ -516,6 +525,11 @@ void showFaceHr(int t_hr) {
 // Zero out the clock's face so we can start over, but don't waste
 // cycles showing it.
 void setFaceColor(uint32_t t_color) {
+  #ifdef DEBUGON
+    Serial.print("Setting clock face to color ");
+    Serial.println(t_color, HEX);
+  #endif
+  
   // Set each element of the face to a specific color.
   for(int i = 0; i < F_LENGTH; i++) {
     face.setPixelColor(i, t_color);
@@ -523,11 +537,15 @@ void setFaceColor(uint32_t t_color) {
   }
 }
 
-// Set the hour pixel.
+// Set the minute pixels.
 void showFaceMin(int t_min) {
 
   // We want 5 dimming stages using the minute mask value
   // determined by min % 5.
+
+  #ifdef DEBUGON
+    Serial.println("Create minute marks.");
+  #endif
 
   // Set the minute LED "cursor".
   int x_minPix = t_min / 5;
@@ -557,6 +575,10 @@ void showFaceMin(int t_min) {
 // Set the hour pixel.
 void showFaceSec(int t_sec) {
 
+  #ifdef DEBUGON
+    Serial.println("Create second marks.");
+  #endif
+  
   // Set the second LED "cursor".
   int x_secPix = t_sec / 5;
   // Figure out how bright to make the
@@ -589,6 +611,10 @@ void showSecFlash() {
   int scaledG;
   int scaledB;
   
+  #ifdef DEBUGON
+    Serial.println("Doing seconds blink effect.");
+  #endif
+  
   // Light and fade to black.
   for (int i = F_SECL_STEP; i >= 0; i--) {
     // Use map() to dim LED in a porportional fasion. 
@@ -610,6 +636,13 @@ void showSecFlash() {
 
 // Set a range of pixels
 void setFaceRange(int t_first, int t_last, int t_r, int t_g, int t_b) {
+  #ifdef DEBUGON
+    Serial.print("Setting pixels ");
+    Serial.print(t_first, DEC);
+    Serial.print(" - ");
+    Serial.println(t_last, DEC);
+  #endif
+  
   // Set the pixels.
   for (int i = t_first; i <= t_last; i++) {
     // Assign the current pixel the color.
