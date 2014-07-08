@@ -16,15 +16,6 @@
   Uno, you can comment out the #define USINGFLORA line.
 */
  
-/* - TODO -
- * + Implement code to set RTC from menu options.
- * + Finish RTC GMT offset for default and secondary time zones.
- * + Implement GMT storage for both time zones in EEPROM for persistence across
- *   reboots.
- * + Implement GMT offset that allows the setting of hours and minutes for both
- *   time zones.
- */
-
 /************
  * INCLUDES *
  ************/
