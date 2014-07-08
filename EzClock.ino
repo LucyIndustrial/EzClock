@@ -145,10 +145,10 @@
 // EEPROM timezone data storage addresses (each int will be 2 bytes long)
 #define TZ_A_ID      0 // GMT offset/timezone A's identifier
 #define TZ_B_ID      1 // GMT offset/timezone B's identifier
-#define EEP_TZ_HR_A  0 // GMT offset/timezone A, offset in hours, signed int.
-#define EEP_TZ_MIN_A 2 // GMT offset/timezone A, offset in minutes, signed int.
-#define EEP_TZ_HR_B  4 // GMT offset/timezone B, offset in hours, signed int.
-#define EEP_TZ_MIN_B 6 // GMT offset/timezone B, offset in minutes, signed int.
+#define EEP_TZ_HR_A  0x00 // GMT offset/timezone A, offset in hours, signed int.
+#define EEP_TZ_MIN_A 0x01 // GMT offset/timezone A, offset in minutes, signed int.
+#define EEP_TZ_HR_B  0x02 // GMT offset/timezone B, offset in hours, signed int.
+#define EEP_TZ_MIN_B 0x03 // GMT offset/timezone B, offset in minutes, signed int.
 
 
 /***********
@@ -304,10 +304,10 @@ if (!rtc.isrunning()) {
 void loop() {
 
   // Check to see if we got an IRQ from the RTC.
-  if (r_IrqFlag) {
+  if (checkRIRQ()) {
     
     // Clear the IRQ flag since we're handling it now.
-    r_IrqFlag = 0;
+    clearRIRQ();
 
     #ifdef DEBUGON
       Serial.println("Tick, tock.");
@@ -322,7 +322,7 @@ void loop() {
   }
 
   // Do we have a touch IRQ?
-  if (t_IrqFlag) {
+  if (checkTIRQ()) {
 
     // Grab the state of the touched keys before clearing the IRQ.
     uint8_t touched = getTouched();
@@ -417,7 +417,7 @@ void handleLight() {
   // Go until we've looped through all possible values.
   while(currentStep <= 2) {
     // If the IRQ
-    if (t_IrqFlag) {
+    if (checkTIRQ()) {
       // Clear the touch IRQ since we're handling it now.
       clearTIRQ();
       
@@ -814,6 +814,12 @@ void clearTIRQ() {
   cap.writeRegister(0x00, cap.readRegister(0x00) & 0xFE);
 }
 
+// Check the touch IRQ
+boolean checkTIRQ() {
+  // Return the flag state.
+  return t_IrqFlag;
+}
+
 // Set our RTC IRQ flag.
 void setRIrqFlag() {
   // Note: this gets set every time the RTC
@@ -822,3 +828,14 @@ void setRIrqFlag() {
   r_IrqFlag = 1;
 }
 
+// Clear the RTC IRQ flag.
+void clearRIrqFlag() {
+  // Clear the RTC IRQ flag.
+  r_IrqFlag = 0;
+}
+
+// Check the RTC IRQ
+boolean checkRIRQ() {
+  // Return the IRQ flag.
+  return r_IrqFlag;
+}
