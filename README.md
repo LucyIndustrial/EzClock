@@ -23,6 +23,7 @@ This project uses the following 3rd party Arduino libraries:
  - Mizraith's RTC Library: https://github.com/mizraith/RTClib/
 
 Minimum parts list for the project as-designed:
+ - A computer that has the Arduino IDE installed.
  - Arduino Uno or Adafruit Flora microcontroller and related cabling/programmer.
  - 37 Adafruit NeoPixels connected as a single strand
  - A ChronoDot 2.0/2.1 RTC module (based on the DS3231 RealTime Clock IC) and suitable battery.
