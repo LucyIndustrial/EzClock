@@ -204,7 +204,10 @@ int r_min; // Global minute value from RTC. (Shoudld be in GMT / UTC)
 int r_sec; // Global second value from RTC. (Shoudld be in GMT / UTC)
 int tz_a[] = {-12, -60}; // Time zone/GMT offset A global value (use a bogus value)
 int tz_b[] = {-13, -61}; // Time zone/GMT offset B global value (use a bogus value)
-
+int currentTz[] = tz_a; // Setting the default time zone with the data for time zone A.
+int f_secl_r = F_SECL_TZA_R; // Set the default second RGB values to reflect that we're using time zone A at startup.
+int f_secl_g = F_SECL_TZA_G;
+int f_secl_b = F_SECL_TZA_B;
 /*******************************
  * ARDUINO SETUP AND MAIN LOOP *
  *******************************/
@@ -630,10 +633,10 @@ void showSecFlash() {
   
   // Light and fade to black.
   for (int i = F_SECL_STEP; i >= 0; i--) {
-    // Use map() to dim LED in a porportional fasion. 
-    scaledR = map(i, 0, F_SECL_STEP, F_DEFAULT_R, F_SECL_TZA_R);
-    scaledG = map(i, 0, F_SECL_STEP, F_DEFAULT_G, F_SECL_TZA_G);
-    scaledB = map(i, 0, F_SECL_STEP, F_DEFAULT_B, F_SECL_TZA_B);
+    // Use map() to dim LED in a porportional fasion.
+    scaledR = map(i, 0, F_SECL_STEP, F_DEFAULT_R, f_secl_r);
+    scaledG = map(i, 0, F_SECL_STEP, F_DEFAULT_G, f_secl_g);
+    scaledB = map(i, 0, F_SECL_STEP, F_DEFAULT_B, f_secl_b);
     
     // Write the color.
     face.setPixelColor(F_SECLSTART, face.Color(gamma[scaledR], gamma[scaledG], gamma[scaledB]));
