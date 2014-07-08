@@ -448,7 +448,6 @@ void handleLight() {
   face.show();
   delay(F_LIGHT_DLY);
 
-
   // Reset our counter.
   currentStep = 0;
 
@@ -647,6 +646,27 @@ void showSecFlash() {
     
     // And draw the clock face since we're in the loop still.
     drawClockFace();
+    
+    // Since we're in this animation for a significant amount of time
+    // touch commands may not register, so we should make sure we're dealing
+    // with them.
+    if(checkTIRQ()) {
+      // Grab the state of the touched keys before clearing the IRQ.
+      uint8_t touched = getTouched();
+            
+      // Clear the touch IRQ since we're handling the touch event.
+      clearTIRQ();
+      
+      // Do our main menu thing.
+      handleMain(touched);
+      
+      // If we've detected another second passing by since
+      // going to the main menu break out of the animation
+      // to have it start over after the clock face is updated.
+      if(checkRIRQ()) {
+        break;
+      }
+    }
     
     // Wait a bit.
     delay(F_SECL_DELAY);
