@@ -401,7 +401,7 @@ void handleLight() {
   int lightSteps[] = {F_LIGHT_A, F_LIGHT_B, F_LIGHT_C};
 
   // Start-up animation
-  setFaceRange(0, F_LENGTH -1, F_DEFAULT_R, F_DEFAULT_G, F_DEFAULT_G);
+  setFaceRange(0, F_LENGTH -1, F_DEFAULT_R, F_DEFAULT_G, F_DEFAULT_B);
   face.show();
   delay(F_LIGHT_DLY);
   face.setPixelColor(F_SECLSTART, gamma[lightSteps[currentStep]], gamma[lightSteps[currentStep]], gamma[lightSteps[currentStep]]);
