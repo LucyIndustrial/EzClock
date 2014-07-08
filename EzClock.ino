@@ -117,9 +117,12 @@
 #define F_SECLSTART  36 // Where is our center second LED
 #define F_SECL_DELAY 10 // How long do we wait before dimming again?
 #define F_SECL_STEP  10 // How many dimming steps do we have?
-#define F_SECL_R     100 // Second pixel RGB values
-#define F_SECL_G     0
-#define F_SECL_B     50
+#define F_SECL_TZA_R 100 // Second pixel RGB values for time zone A
+#define F_SECL_TZA_G 0
+#define F_SECL_TZA_B 50
+#define F_SECL_TZB_R 0 // Second pixel RGB values for time zone B
+#define F_SECL_TZB_G 0
+#define F_SECL_TZB_B 100
 
 #define F_LIGHT_A    85 // When the clock face is used as a light, this is the first brightness setting.
 #define F_LIGHT_B    169 // Second brightness setting
@@ -628,9 +631,9 @@ void showSecFlash() {
   // Light and fade to black.
   for (int i = F_SECL_STEP; i >= 0; i--) {
     // Use map() to dim LED in a porportional fasion. 
-    scaledR = map(i, 0, F_SECL_STEP, F_DEFAULT_R, F_SECL_R);
-    scaledG = map(i, 0, F_SECL_STEP, F_DEFAULT_G, F_SECL_G);
-    scaledB = map(i, 0, F_SECL_STEP, F_DEFAULT_B, F_SECL_B);
+    scaledR = map(i, 0, F_SECL_STEP, F_DEFAULT_R, F_SECL_TZA_R);
+    scaledG = map(i, 0, F_SECL_STEP, F_DEFAULT_G, F_SECL_TZA_G);
+    scaledB = map(i, 0, F_SECL_STEP, F_DEFAULT_B, F_SECL_TZA_B);
     
     // Write the color.
     face.setPixelColor(F_SECLSTART, face.Color(gamma[scaledR], gamma[scaledG], gamma[scaledB]));
