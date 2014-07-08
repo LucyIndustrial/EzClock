@@ -145,10 +145,10 @@
 // EEPROM timezone data storage addresses (each int will be 2 bytes long)
 #define TZ_A_ID      0 // GMT offset/timezone A's identifier
 #define TZ_B_ID      1 // GMT offset/timezone B's identifier
-#define EEP_TZ_HR_A  0x00 // GMT offset/timezone A, offset in hours, signed int.
-#define EEP_TZ_MIN_A 0x01 // GMT offset/timezone A, offset in minutes, signed int.
-#define EEP_TZ_HR_B  0x02 // GMT offset/timezone B, offset in hours, signed int.
-#define EEP_TZ_MIN_B 0x03 // GMT offset/timezone B, offset in minutes, signed int.
+#define EEP_TZ_HR_A  0x00 // GMT offset/timezone A, offset in hours EEPROM address.
+#define EEP_TZ_MIN_A 0x01 // GMT offset/timezone A, offset in minutes EEPROM address.
+#define EEP_TZ_HR_B  0x02 // GMT offset/timezone B, offset in hours EEPROM address.
+#define EEP_TZ_MIN_B 0x03 // GMT offset/timezone B, offset in minutes EEPROM address.
 
 
 /***********
@@ -712,13 +712,32 @@ uint8_t getTouched() {
 }
 
 // Get the stored values in EEPROM for time zone offset
-void getTZ(int t_tzID, int t_tzDatArray[]) {
-  // For now we store and return a dummy value.
+void loadTZ(int t_tzID, int t_tzDatArray[]) {
+  // Create our storage variables.
+  int h_addr;
+  int m_addr;
+
+  // Figure out which time zone we're requesting.
+  switch(t_tzID) {
+    case 0:
+      // This is the default time zone displayed.
+      h_addr = EEP_TZ_HR_A;
+      m_addr = EEP_TZ_MIN_A;
+      break;
+    case 1:
+      h_addr = EEP_TZ_HR_B;
+      m_addr = EEP_TZ_MIN_B;
+      break;
+    default:
+      // The default behavior is to just read the first address set.
+      h_addr = EEP_TZ_HR_A;
+      m_addr = EEP_TZ_MIN_A;
+      break;
+  }
   
-  // Set our GMT offset in hours and minutes to zero
-  // since we're prototyping on local time for now.
-  t_tzDatArray[0] = 0;
-  t_tzDatArray[1] = 0;
+  // Read time zone data at the specified addresses.
+  t_tzDatArray[0] = EEPROM.read(h_addr);
+  t_tzDatArray[1] = EEPROM.read(m_addr);
 
   #ifdef DEBUGON
     Serial.print("Got time zone ");
@@ -732,11 +751,54 @@ void getTZ(int t_tzID, int t_tzDatArray[]) {
   // Supposedly this should work (via http://forum.arduino.cc/index.php?topic=40644.0)
 }
 
-// Set the stored values in EEPROM for time zone A's offset
-void setTZ(int t_tzID, int t_offsetHrs, int t_offsetMins) {
+// Ssve time zone offset data.
+void saveTZ(int t_tzID, int t_offsetHrs, int t_offsetMins) {
   // Dummy function, do nothing until implemented.
   #ifdef DEBUGON
     Serial.print("Setting time zone ");
+    Serial.print(t_tzID);
+    Serial.print(" as GMT ");
+    Serial.print(t_offsetHrs);
+    Serial.print(":");
+    Serial.println(t_offsetMins);
+  #endif
+  // Set our good data flag
+  boolean goodTzID = false;
+  
+  // Create our storage variables.
+  int h_addr;
+  int m_addr;
+
+  // Figure out which time zone we're trying to save.
+  switch(t_tzID) {
+    case 0:
+      goodTzID = true;
+      h_addr = EEP_TZ_HR_A;
+      m_addr = EEP_TZ_MIN_A;
+      break;
+    case 1:
+      goodTzID = true;
+      h_addr = EEP_TZ_HR_B;
+      m_addr = EEP_TZ_MIN_B;
+      break;
+    default:
+      // Don't set any variables.
+      #ifdef DEBUGON
+        Serial.print("Invalid time zone ID: ");
+        Serial.println(t_tzID);
+      #endif
+      break;
+  }
+  
+  // If we got a good time we can write the offset data to the EEPROM
+  if(goodTzID) {
+    // Read time zone data at the specified addresses.
+    EEPROM.write(h_addr, t_offsetHrs);
+    EEPROM.write(m_addr, t_offsetMins);
+  }
+  
+  #ifdef DEBUGON
+    Serial.print("Got time zone ");
     Serial.print(t_tzID);
     Serial.print(" as GMT ");
     Serial.print(t_offsetHrs);
@@ -751,8 +813,9 @@ void configTZ() {
     Serial.println("Configuring time zones...");
   #endif
   
-  getTZ(TZ_A_ID, tz_a);
-  getTZ(TZ_B_ID, tz_b);
+  // Grab both time zone values from EEPROM, and set tz_a and tz_b with them.
+  loadTZ(TZ_A_ID, tz_a);
+  loadTZ(TZ_B_ID, tz_b);
 }
 
 /**********************************
@@ -829,7 +892,7 @@ void setRIrqFlag() {
 }
 
 // Clear the RTC IRQ flag.
-void clearRIrqFlag() {
+void clearRIRQ() {
   // Clear the RTC IRQ flag.
   r_IrqFlag = 0;
 }
