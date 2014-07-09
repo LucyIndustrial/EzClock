@@ -41,88 +41,88 @@
 //#define USINGFLORA
 
 // Touch interface config
-#define T_KEY1       0x01
-#define T_KEY2       0x02
-#define T_KEY3       0x04
-#define T_KEY4       0x08
-#define T_KEY5       0x10
-#define T_KEY6       0x20
-#define T_KEY7       0x40
-#define T_KEY8       0x80
+#define T_KEY1        0x01
+#define T_KEY2        0x02
+#define T_KEY3        0x04
+#define T_KEY4        0x08
+#define T_KEY5        0x10
+#define T_KEY6        0x20
+#define T_KEY7        0x40
+#define T_KEY8        0x80
 
 // Touch sensor IRQ config
 #ifdef USINGFLORA
-  #define T_IRQPIN   0 // The Flora uses the "RX" pin for the IRQ
-  #define T_IRQ      2 // Which is IRQ #2
+  #define T_IRQPIN    0 // The Flora uses the "RX" pin for the IRQ
+  #define T_IRQ       2 // Which is IRQ #2
 #else
-  #define T_IRQPIN   2 // The Uno uses D2 for the IRQ
-  #define T_IRQ      0 // Which is IRQ #0
+  #define T_IRQPIN    2 // The Uno uses D2 for the IRQ
+  #define T_IRQ       0 // Which is IRQ #0
 #endif
 
 // ChronoDot 2.0/DS3231 RTC config
-#define RTC_SQW_FREQ DS3231_SQW_FREQ_1
+#define RTC_SQW_FREQ  DS3231_SQW_FREQ_1
 
 // ChronoDot RTC SQW/IRQ pin
 #ifdef USINGFLORA
-  #define R_IRQPIN   1 // The Flora uses the "TX" pin for the IRQ
-  #define R_IRQ      3 // Which is IRQ #3
+  #define R_IRQPIN    1 // The Flora uses the "TX" pin for the IRQ
+  #define R_IRQ       3 // Which is IRQ #3
 #else
-  #define R_IRQPIN   3 // The Uno uses D3 for the IRQ
-  #define R_IRQ      1 // Which is IRQ #1
+  #define R_IRQPIN    3 // The Uno uses D3 for the IRQ
+  #define R_IRQ       1 // Which is IRQ #1
 #endif
 
 // Turn this LED off after boot.
 #ifdef USINGFLORA
-  #define INDLED     7  // On-board Flora LED PIN
+  #define INDLED      7  // On-board Flora LED PIN
 #else
-  #define INDLED     13 // On-board Arduino Uno LED PIN
+  #define INDLED      13 // On-board Arduino Uno LED PIN
 #endif
 
 
 // Clock face config - Part of this assumes pixels are hooked up like hr -> min -> sec
-#define F_LENGTH     37 // How many NeoPixels do we have in the face?
+#define F_LENGTH      37 // How many NeoPixels do we have in the face?
 
-#define F_DEFAULT_R  0 // The "background" color for the clock face.
-#define F_DEFAULT_G  0
-#define F_DEFAULT_B  0
+#define F_DEFAULT_R   0 // The "background" color for the clock face.
+#define F_DEFAULT_G   0
+#define F_DEFAULT_B   0
 
 // Clock face hour marks
-#define F_HR_MARK_R  135 // Tick mark RGB values.
-#define F_HR_MARK_G  90
-#define F_HR_MARK_B  0
+#define F_HR_MARK_R   135 // Tick mark RGB values.
+#define F_HR_MARK_G   90
+#define F_HR_MARK_B   0
 
 // Configure hours display stuff.
-#define F_HRSTART    0  // Which pixel does the hour start at?
-#define F_HRLEN      24 // The hour is 24 pixels long.
-#define F_HR_R       0  // RGB values for the hour
-#define F_HR_G       90
-#define F_HR_B       90
-#define F_HR_TRLEN   6   // Add a 6-pixel trail behind the current hour pixel.
+#define F_HRSTART     0  // Which pixel does the hour start at?
+#define F_HRLEN       24 // The hour is 24 pixels long.
+#define F_HR_R        0   // RGB values for the hour
+#define F_HR_G        90
+#define F_HR_B        90
+#define F_HR_TRLEN    6   // Add a 6-pixel trail behind the current hour pixel.
 
 // Configure mintues display stuff.
-#define F_MINSTART   24 // Which pixel does the minute start at?
-#define F_MINLEN     12 // The minute is 12 pixels long.
-#define F_MIN_R      40   // RGB values for the minutes
-#define F_MIN_G      0
-#define F_MIN_B      0
+#define F_MINSTART    24 // Which pixel does the minute start at?
+#define F_MINLEN      12 // The minute is 12 pixels long.
+#define F_MIN_R       40   // RGB values for the minutes
+#define F_MIN_G       0
+#define F_MIN_B       0
 
 // Display seconds display stuff.
-#define F_SECSTART   24 // Which pixel is for seconds?
-#define F_SECLEN     12 // The seconds is 1 pixel long
-#define F_SEC_R      0   // RGB values for the seconds
-#define F_SEC_G      40
-#define F_SEC_B      0
+#define F_SECSTART    24 // Which pixel is for seconds?
+#define F_SECLEN      12 // The seconds is 1 pixel long
+#define F_SEC_R       0   // RGB values for the seconds
+#define F_SEC_G       40
+#define F_SEC_B       0
 
 // This config is for the seconds "pulse" LED/pixel.
-#define F_SECLSTART  36 // Where is our center second LED
-#define F_SECL_DELAY 10 // How long do we wait before dimming again?
-#define F_SECL_STEP  10 // How many dimming steps do we have?
-#define F_SECL_TZA_R 100 // Second pixel RGB values for time zone A
-#define F_SECL_TZA_G 0
-#define F_SECL_TZA_B 50
-#define F_SECL_TZB_R 0 // Second pixel RGB values for time zone B
-#define F_SECL_TZB_G 0
-#define F_SECL_TZB_B 100
+#define F_SECLSTART   36 // Where is our center second LED
+#define F_SECL_DELAY  10 // How long do we wait before dimming again?
+#define F_SECL_STEP   10 // How many dimming steps do we have?
+#define F_SECL_TZA_R  100 // Second pixel RGB values for time zone A
+#define F_SECL_TZA_G  0
+#define F_SECL_TZA_B  50
+#define F_SECL_TZB_R  100 // Second pixel RGB values for time zone B
+#define F_SECL_TZB_G  60
+#define F_SECL_TZB_B  0
 
 // Settings for time zone configuration display/animation
 #define F_TZSET_ZRO_R 90 // RGB settings for the time zone setting screen's zero line.
@@ -136,10 +136,10 @@
 #define F_TZSET_MNS_B 0
 
 // Light feature settings
-#define F_LIGHT_A    85 // When the clock face is used as a light, this is the first brightness setting.
-#define F_LIGHT_B    169 // Second brightness setting
-#define F_LIGHT_C    255 // Last brightness setting
-#define F_LIGHT_DLY  100 // Light mode animation delay for start/stop.
+#define F_LIGHT_A     85 // When the clock face is used as a light, this is the first brightness setting.
+#define F_LIGHT_B     169 // Second brightness setting
+#define F_LIGHT_C     255 // Last brightness setting
+#define F_LIGHT_DLY   100 // Light mode animation delay for start/stop.
 
 // NeoPixel clock face data pin
 #ifdef USINGFLORA
@@ -381,10 +381,12 @@ void handleMain(int t_touched) {
     // Key 1 pressed from normal clock mode.
   case T_KEY1:
     // Display time zone #1
+    setCurrentTZ(TZ_A_ID);
     break;
 
   // Display time zone #2
   case T_KEY2:
+    setCurrentTZ(TZ_B_ID);
     break;
 
   // Key 3 pressed from normal clock mode.
