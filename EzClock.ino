@@ -976,17 +976,61 @@ void setCurrentTZ(int t_tzID) {
  * CONVERSIONS AND "WRAPPERS" *
  ******************************/
  
-// Compensate for GMT offset in hours by wrapping from 0-23 and vice versa.
-int tzWrapHr(int t_hr, int t_offset) {
-  // Do nothing
-  return t_hr;
+// Compensate for GMT offset in hours by wrapping from 0-23 hrs, 0-59 mins, and vice versa.
+void tzWrapTime(int t_currentTime[], int t_tz[]) {
+  // Hour carry variable to be used if we need to add or subtract an hour based on the minutes.
+  int hrCarry = 0;
+  
+  // Adjusted hour and minute to be returned.
+  int adjHr;
+  int adjMin;
+  
+  // Set up variables to test with and use for adjusting the "current" time.
+  int offsetTestMin = t_currentTime[1] + t_tz[1];
+  int offsetTestHr = t_currentTime[0] + t_tz[0];
+  
+  // If we're out of bounds on the minute after adjusting the offset let's fix it.
+  if (offsetTestMin <= 59 && offsetTestMin >= 0) {
+    // Set the returned minute as-is.
+    adjMin = t_currentTime[1] + t_tz[1];
+  } else {
+    // If it's too big trim it.
+    if (offsetTestMin > 59) {
+      adjMin = (t_currentTime[1] + t_tz[1]) - 59;
+      // Also carry an hour because we just rolled up one hour.
+      hrCarry++;
+      
+    } else {
+      // It's too small so let's add 59 seconds.
+      adjMin = (t_currentTime[1] + t_tz[1]) + 59;
+      // Roll back one hour since we rolld back an hour.
+      hrCarry--;
+    }
+  }
+  
+  // Adjust our offset before looking at the hour value.
+  offsetTestHr = t_currentTime[0] + hrCarry;
+  
+  // If we're out of bounds on the hour after adjusting th eoffset let's fix it, too.
+  if (offsetTestHr <= 23 && offetTestHr >= 0) {
+    // We're good as-is so let's just return what we've already calculated.
+    adjHr = offsetTestHr;
+  } else {
+    // If the hour was too "big"
+    if (offsetTestHr > 23) {
+      // Adjust it.
+      adjHr = offsetTestHr - 23;
+    } else {
+      // If it was too small adjust it.
+      adjHr = offsetTestHr + 23;
+    }
+  }
+  
+  // Now update the time we were fed.
+  t_currentTime[0] = adjHr;
+  t_currentTime[1] = adjMin;
 }
 
-// Compensate for GMT offset in minutes by wrapping from 0-59 and vice versa.
-int tzWrapMin(int t_min, int t_offset) {
-  // Do nothing
-  return t_min;
-}
  
  /**********************
  * INTERRUPT HANDLERS *
