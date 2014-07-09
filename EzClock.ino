@@ -134,6 +134,7 @@
 #define F_TZSET_MNS_R 90 // RGB settings for hours and minutes in the GMT - reigon.
 #define F_TZSET_MNS_G 0
 #define F_TZSET_MNS_B 0
+#define F_TZSET_MIN_I 30 // Increment in minutes that we set - default is 30 mins.
 
 // Light feature settings
 #define F_LIGHT_A     85 // When the clock face is used as a light, this is the first brightness setting.
@@ -379,41 +380,41 @@ void handleMain(int t_touched) {
   // What was touched?
   switch(t_touched) {
     // Key 1 pressed from normal clock mode.
-  case T_KEY1:
-    // Display time zone #1
-    setCurrentTZ(TZ_A_ID);
-    break;
+    case T_KEY1:
+      // Display time zone #1
+      setCurrentTZ(TZ_A_ID);
+      break;
+      
+    // Display time zone #2
+    case T_KEY2:
+      setCurrentTZ(TZ_B_ID);
+      break;
 
-  // Display time zone #2
-  case T_KEY2:
-    setCurrentTZ(TZ_B_ID);
-    break;
+    // Key 3 pressed from normal clock mode.
+    case T_KEY3:
+      // Activate light mode.
+      handleLight();
+      break;
 
-  // Key 3 pressed from normal clock mode.
-  case T_KEY3:
-    // Activate light mode.
-    handleLight();
-    break;
+    // Set offset for time zone ID 0.
+    case T_KEY6:
+      handleSetTz(TZ_A_ID);
+      break;
 
-    // Set UTC offset for time zone #1
-  case T_KEY6:
-    // We change the time zone here.
-    break;
+    // Set offset for time zone ID 1.
+    case T_KEY7:
+     handleSetTz(TZ_B_ID);
+     break;
 
-      // Set UTC offset for time zone #2
-  case T_KEY7:
-    // We change the time zone here.
-    break;
+    // Set the system UTC time.
+    case T_KEY8:
+      // Change the UTC time.
+      break;
 
-  // Set the system UTC time.
-  case T_KEY8:
-    // Change the UTC time.
-    break;
-
-  // If anything else came through we don't care.
-  default:
-    // Do nothing.
-    break;
+    // If anything else came through we don't care.
+    default:
+      // Do nothing.
+      break;
   }
 }
 
@@ -479,6 +480,49 @@ void handleLight() {
 
   #ifdef DEBUGON
     Serial.println("Done lighting.");
+  #endif
+}
+
+// Set the specified timezone.
+void handleSetTz(int t_targetTz) {
+  #ifdef DEBUGON
+    Serial.print("User configuring timezone ID: ");
+    Serial.println(t_targetTz);
+  #endif
+  
+  // Track the timezone for the given ID we started with in case
+  // it doesn't chage so we don't have to waste a r/w cycle on the EEPROM.
+  int beginningTzHr;
+  int beginningTzMin;
+
+  /*
+  #define F_TZSET_PLS_R/G/B
+  #define F_TZSET_MNS_R/G/B
+  #define F_TZSET_MIN_I <- How far do we increment the minutes per keypress?
+  */
+  
+  // First blank the clock face.
+  setFaceRange(0, F_LENGTH -1, F_DEFAULT_R, F_DEFAULT_G, F_DEFAULT_B);
+  face.show();
+
+  // Draw the "zero line" for hours.
+  face.setPixelColor(F_HRSTART, F_TZSET_ZRO_R, F_TZSET_ZRO_G, F_TZSET_ZRO_B);
+  
+  // Do the same for minutes.
+  face.setPixelColor(F_MINSTART, F_TZSET_ZRO_R, F_TZSET_ZRO_G, F_TZSET_ZRO_B);
+
+  // Now show it.
+  face.show();
+  
+  // Wait for visual debugging purposes.
+  delay(2000);
+  
+  #ifdef DEBUGON
+    Serial.print("Timezone ID ");
+    Serial.print(t_targetTz);
+    Serial.print(" is now GMT XX");
+    Serial.print(":");
+    Serial.println("XX");
   #endif
 }
 
