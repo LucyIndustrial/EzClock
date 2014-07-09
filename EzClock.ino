@@ -950,6 +950,11 @@ void configRTC() {
 
 // Set active time zone.
 void setCurrentTZ(int t_tzID) {
+  #ifdef DEBUGON
+    Serial.print("Switching to timezone ID: ");
+    Serial.println(t_tzID);
+  #endif
+  
   // Select the time zone we want to use and set the color of the second flash LED and the offset.
   switch(t_tzID) {
     case 0:
