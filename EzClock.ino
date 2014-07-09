@@ -215,6 +215,10 @@ int r_hr; // Global hour value from RTC. (Shoudld be in GMT / UTC)
 int r_min; // Global minute value from RTC. (Shoudld be in GMT / UTC)
 int r_sec; // Global second value from RTC. (Shoudld be in GMT / UTC)
 
+// Offset-compensated time - use r_sec for the current # of seconds since that doesn't change.
+int currentHr = -13;
+int currentMin = -60;
+
 int tz_a[] = {-12, -60}; // Time zone/GMT offset A global value (use a bogus value)
 int tz_b[] = {-13, -61}; // Time zone/GMT offset B global value (use a bogus value)
 int currentTz[] = {-100, -100}; // This will store the current time zone (use a bogus value)
@@ -323,7 +327,6 @@ void setup() {
 
 // Main program loop
 void loop() {
-
   // Check to see if we got an IRQ from the RTC.
   if (checkRIRQ()) {
     #ifdef DEBUGON
@@ -335,10 +338,13 @@ void loop() {
    
     // Get the new time value from the RTC.
     getRTCTime();
-    
+
+    // Set our global "current time" variable now that we have
+    // accounted for the GMT offset.
+    setCurrentTime(currentTz);
+        
     // Show our clock face since we have new time data!
     showClockFace();
-
   }
 
   // Do we have a touch IRQ?
@@ -493,9 +499,9 @@ void showClockFace() {
   // Display hour marks.
   showFaceHrMarks(hrMarkColor);
   // Display our hours
-  showFaceHr(r_hr);
+  showFaceHr(currentHr);
   // Show our minutes
-  showFaceMin(r_min);
+  showFaceMin(currentMin);
   // Show our seconds.
   showFaceSec(r_sec);
   
@@ -570,7 +576,6 @@ void setFaceColor(uint32_t t_color) {
   // Set each element of the face to a specific color.
   for(int i = 0; i < F_LENGTH; i++) {
     face.setPixelColor(i, t_color);
-
   }
 }
 
@@ -629,10 +634,8 @@ void showFaceSec(int t_sec) {
   // Set our color mask based
   uint32_t cursorColor = face.Color(scaledR, scaledG, scaledB);
 
-
   // Set "current" minute pixel
   face.setPixelColor(F_SECSTART + x_secPix, cursorColor ^ face.getPixelColor(F_SECSTART + x_secPix));
-
 
   // Set previous minute pixels for fill-in effect.
   for (int i = x_secPix - 1; i >= 0; i--) {
@@ -689,7 +692,7 @@ void showSecFlash() {
         break;
       }
     }
-    
+
     // Wait a bit.
     delay(F_SECL_DELAY);
   }
@@ -720,9 +723,9 @@ void setFaceRange(int t_first, int t_last, int t_r, int t_g, int t_b) {
 // Update the time from the RTC.
 void getRTCTime() {
 
-#ifdef DEBUGON
-  Serial.println("Getting RTC time...");
-#endif
+  #ifdef DEBUGON
+    Serial.println("Getting RTC time...");
+  #endif
 
   DateTime now = rtc.now();
 
@@ -731,14 +734,14 @@ void getRTCTime() {
   r_min = now.minute(); // Second byte is minutes in BCD format.
   r_hr = now.hour(); // Last byte is hours in BDC format.
 
-#ifdef DEBUGON
-  Serial.print("Got RTC time: ");
-  Serial.print(r_hr);
-  Serial.print(":");
-  Serial.print(r_min);
-  Serial.print(":");
-  Serial.println(r_sec);
-#endif
+  #ifdef DEBUGON
+    Serial.print("Got RTC time: ");
+    Serial.print(r_hr);
+    Serial.print(":");
+    Serial.print(r_min);
+    Serial.print(":");
+    Serial.println(r_sec);
+  #endif
 }
 
 // Get out touched keys.
@@ -977,7 +980,7 @@ void setCurrentTZ(int t_tzID) {
  ******************************/
  
 // Compensate for GMT offset in hours by wrapping from 0-23 hrs, 0-59 mins, and vice versa.
-void tzWrapTime(int t_currentTime[], int t_tz[]) {
+void setCurrentTime(int t_tz[]) {
   // Hour carry variable to be used if we need to add or subtract an hour based on the minutes.
   int hrCarry = 0;
   
@@ -986,33 +989,43 @@ void tzWrapTime(int t_currentTime[], int t_tz[]) {
   int adjMin;
   
   // Set up variables to test with and use for adjusting the "current" time.
-  int offsetTestMin = t_currentTime[1] + t_tz[1];
-  int offsetTestHr = t_currentTime[0] + t_tz[0];
+  int offsetTestMin = r_min + t_tz[1];
+  int offsetTestHr = r_hr + t_tz[0];
+  
+  #ifdef DEBUGON
+    Serial.print("Adjusting ");
+    Serial.print(r_hr);
+    Serial.print(":");
+    Serial.print(r_min);
+    Serial.print(" for GMT offset ");
+    Serial.print(t_tz[0]);
+    Serial.print(":");
+    Serial.println(t_tz[1]);
+  #endif
   
   // If we're out of bounds on the minute after adjusting the offset let's fix it.
   if (offsetTestMin <= 59 && offsetTestMin >= 0) {
     // Set the returned minute as-is.
-    adjMin = t_currentTime[1] + t_tz[1];
+    adjMin = offsetTestMin;
   } else {
     // If it's too big trim it.
     if (offsetTestMin > 59) {
-      adjMin = (t_currentTime[1] + t_tz[1]) - 59;
+      adjMin = offsetTestMin - 59;
       // Also carry an hour because we just rolled up one hour.
       hrCarry++;
-      
     } else {
       // It's too small so let's add 59 seconds.
-      adjMin = (t_currentTime[1] + t_tz[1]) + 59;
+      adjMin = offsetTestMin + 59;
       // Roll back one hour since we rolld back an hour.
       hrCarry--;
     }
   }
   
   // Adjust our offset before looking at the hour value.
-  offsetTestHr = t_currentTime[0] + hrCarry;
+  offsetTestHr += hrCarry;
   
   // If we're out of bounds on the hour after adjusting th eoffset let's fix it, too.
-  if (offsetTestHr <= 23 && offetTestHr >= 0) {
+  if (offsetTestHr <= 23 && offsetTestHr >= 0) {
     // We're good as-is so let's just return what we've already calculated.
     adjHr = offsetTestHr;
   } else {
@@ -1026,9 +1039,16 @@ void tzWrapTime(int t_currentTime[], int t_tz[]) {
     }
   }
   
+  #ifdef DEBUGON
+    Serial.print("... and got ");
+    Serial.print(adjHr);
+    Serial.print(":");
+    Serial.println(adjMin);
+  #endif
+  
   // Now update the time we were fed.
-  t_currentTime[0] = adjHr;
-  t_currentTime[1] = adjMin;
+  currentHr = adjHr;
+  currentMin = adjMin;
 }
 
  
@@ -1044,9 +1064,9 @@ void setTIrqFlag() {
 
 // Clear the touch IRQ flag and reset the IRQ on the sensor.
 void clearTIRQ() {
-    #ifdef DEBUGON
-      Serial.println("Clearing touch IRQ.");
-    #endif
+  #ifdef DEBUGON
+    Serial.println("Clearing touch IRQ.");
+  #endif
   
   // Clear the flag.
   t_IrqFlag = 0;
