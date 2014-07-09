@@ -908,6 +908,7 @@ void configTZ() {
   #endif
 }
 
+
 /**********************************
  * DEVICE CONFIGURATION FUNCTIONS *
  **********************************/
@@ -942,8 +943,52 @@ void configRTC() {
   rtc.SQWFrequency(RTC_SQW_FREQ);
 }
 
+// Set active time zone.
+void setCurrentTZ(int t_tzID) {
+  // Select the time zone we want to use and set the color of the second flash LED and the offset.
+  switch(t_tzID) {
+    case 0:
+      // Set the seconds LED color
+      f_secl_r = F_SECL_TZA_R;
+      f_secl_g = F_SECL_TZA_G;
+      f_secl_b = F_SECL_TZA_B;
+      // Set the GMT offset.
+      currentTz[0] = tz_a[0]; // Hour offset
+      currentTz[1] = tz_a[1]; // Minute offset
+      break;
+    case 1:
+      // Set the seconds LED color
+      f_secl_r = F_SECL_TZB_R;
+      f_secl_g = F_SECL_TZB_G;
+      f_secl_b = F_SECL_TZB_B;
+      // Set the GMT offset.
+      currentTz[0] = tz_b[0]; // Hour offset
+      currentTz[1] = tz_b[1]; // Minute offset
+      break;
+    default:
+      // do nothing.
+      break;
+  }
+}
 
-/**********************
+
+/******************************
+ * CONVERSIONS AND "WRAPPERS" *
+ ******************************/
+ 
+// Compensate for GMT offset in hours by wrapping from 0-23 and vice versa.
+int tzWrapHr(int t_hr, int t_offset) {
+  // Do nothing
+  return t_hr;
+}
+
+// Compensate for GMT offset in minutes by wrapping from 0-59 and vice versa.
+int tzWrapMin(int t_min, int t_offset) {
+  // Do nothing
+  return t_min;
+}
+ 
+ /**********************
  * INTERRUPT HANDLERS *
  **********************/
 
