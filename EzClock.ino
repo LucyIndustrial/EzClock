@@ -124,10 +124,22 @@
 #define F_SECL_TZB_G 0
 #define F_SECL_TZB_B 100
 
+// Settings for time zone configuration display/animation
+#define F_TZSET_ZRO_R 90 // RGB settings for the time zone setting screen's zero line.
+#define F_TZSET_ZRO_G 90
+#define F_TZSET_ZRO_B 0
+#define F_TZSET_PLS_R 0 // RGB settings for hours and minutes in the GMT + region.
+#define F_TZSET_PLS_G 0
+#define F_TZSET_PLS_B 90
+#define F_TZSET_MNS_R 90 // RGB settings for hours and minutes in the GMT - reigon.
+#define F_TZSET_MNS_G 0
+#define F_TZSET_MNS_B 0
+
+// Light feature settings
 #define F_LIGHT_A    85 // When the clock face is used as a light, this is the first brightness setting.
 #define F_LIGHT_B    169 // Second brightness setting
 #define F_LIGHT_C    255 // Last brightness setting
-#define F_LIGHT_DLY  100 // Light mode animation delay.
+#define F_LIGHT_DLY  100 // Light mode animation delay for start/stop.
 
 // NeoPixel clock face data pin
 #ifdef USINGFLORA
@@ -136,7 +148,7 @@
   #define F_DATAPIN  4
 #endif
 
-// EEPROM timezone data storage addresses (each int will be 2 bytes long)
+// EEPROM timezone data storage addresses
 #define TZ_A_ID      0 // GMT offset/timezone A's identifier
 #define TZ_B_ID      1 // GMT offset/timezone B's identifier
 #define EEP_TZ_HR_A  0x00 // GMT offset/timezone A, offset in hours EEPROM address.
