@@ -494,6 +494,12 @@ void handleSetTz(int t_targetTz) {
   // it doesn't chage so we don't have to waste a r/w cycle on the EEPROM.
   int beginningTzHr;
   int beginningTzMin;
+  int thisTzR; // Hold the value for the center LED to indidcate the TZ we're setting.
+  int thisTzG;
+  int thisTzB;
+  int thisHr; // Hold the hour we want to store as TZ minute
+  int thisMin; // Hold the minute we want to store as TZ minute
+  boolean setting = true;
 
   /*
   #define F_TZSET_PLS_R/G/B
@@ -501,18 +507,87 @@ void handleSetTz(int t_targetTz) {
   #define F_TZSET_MIN_I <- How far do we increment the minutes per keypress?
   */
   
+  // Which target timezone are we after, and what color should the indidcator LED be?
+  switch(t_targetTz) {
+    case TZ_A_ID:
+      thisTzR = F_SECL_TZA_R;
+      thisTzG = F_SECL_TZA_G;
+      thisTzB = F_SECL_TZA_B;
+      thisHr = tz_a[0];
+      thisMin = tz_a[1];
+      beginningTzHr = tz_a[0];
+      beginningTzMin = tz_a[1];
+      break;
+    case TZ_B_ID:
+      thisTzR = F_SECL_TZB_R;
+      thisTzG = F_SECL_TZB_G;
+      thisTzB = F_SECL_TZB_B;
+      thisHr = tz_b[0];
+      thisMin = tz_b[1];
+      beginningTzHr = tz_b[0];
+      beginningTzMin = tz_b[1];
+      break;
+    default:
+      // BAIL!
+      return;
+      break;
+  }
+  
   // First blank the clock face.
   setFaceRange(0, F_LENGTH -1, F_DEFAULT_R, F_DEFAULT_G, F_DEFAULT_B);
-  face.show();
-
   // Draw the "zero line" for hours.
   face.setPixelColor(F_HRSTART, F_TZSET_ZRO_R, F_TZSET_ZRO_G, F_TZSET_ZRO_B);
-  
   // Do the same for minutes.
   face.setPixelColor(F_MINSTART, F_TZSET_ZRO_R, F_TZSET_ZRO_G, F_TZSET_ZRO_B);
-
-  // Now show it.
+  // Set the seconds indicator LED to show which time zone we're setting.
+  face.setPixelColor(F_SECLSTART, thisTzR, thisTzG, thisTzB);
+  // Now show it all.
   face.show();
+  
+  // While we're setiting the time zone keep going.
+  while(setting) {
+    // Did we hit a button of some kind?
+    if(checkTIRQ()) {
+      // Grab the state of the touched keys before clearing the IRQ.
+      uint8_t touched = getTouched();
+      // Clear the touch IRQ since we're handling it now.
+      clearTIRQ();
+      
+      // Determine which key we just pressed, and what to do.
+      switch(touched) {
+        case T_KEY1:
+          // Subtract hour
+          break;
+        case T_KEY2:
+          // Add hour
+          break;
+        case T_KEY3:
+          // Subtract minute at increment specified by F_TZSET_MIN_I
+          break;
+        case T_KEY4:
+          // Add minute at increment specified by F_TZSET_MIN_I
+          break;
+        case T_KEY7:
+          // Cancel
+          // Break out of the loop, don't save time zone to EEPROM.
+          setting = false;
+          break;
+        case T_KEY8:
+          // Save time zone to EEPROM and break out of the loop.
+          setting = false;
+          // If the time zone actually changed write it to EEPROM.
+          if (thisHr != beginningTzHr && thisMin != beginningTzMin) {
+            // Save the time zone.
+            saveTZ(t_targetTz, thisHr, thisMin);
+          }
+          break;
+        default:
+          // Don't care about anything else.
+          break;
+        
+      }
+    }
+  }
   
   // Wait for visual debugging purposes.
   delay(2000);
