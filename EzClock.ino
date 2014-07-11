@@ -221,6 +221,7 @@ int currentMin = -60;
 int tz_a[] = {-12, -60}; // Time zone/GMT offset A global value (use a bogus value)
 int tz_b[] = {-13, -61}; // Time zone/GMT offset B global value (use a bogus value)
 int currentTz[] = {-100, -100}; // This will store the current time zone (use a bogus value)
+int currentTzID = TZ_A_ID;
 
 int f_secl_r = F_SECL_TZA_R; // Set the default second RGB values to reflect that we're using time zone A at startup.
 int f_secl_g = F_SECL_TZA_G;
@@ -303,11 +304,6 @@ void setup() {
   // Configure time zones.
   configTZ();
 
-  // Since we have our time zone values we should set
-  // the current time zone to the default time zone.
-  currentTz[0] = tz_a[0];
-  currentTz[1] = tz_a[1];
-
   // Set our interrupts.
   attachInterrupt(T_IRQ, setTIrqFlag, FALLING); // Touch
   attachInterrupt(R_IRQ, setRIrqFlag, FALLING); // RTC
@@ -340,7 +336,7 @@ void loop() {
 
     // Set our global "current time" variable now that we have
     // accounted for the GMT offset.
-    setCurrentTime(currentTz);
+    setCurrentTime();
         
     // Show our clock face since we have new time data!
     showClockFace();
@@ -569,12 +565,11 @@ void handleSetTz(int t_targetTz) {
           // Save time zone to EEPROM and break out of the loop.
           setting = false;
           // If the time zone actually changed write it to EEPROM.
-          if (thisHr != beginningTzHr && thisMin != beginningTzMin) {
+          if (thisHr != beginningTzHr || thisMin != beginningTzMin) {
             // Save the time zone.
             saveTZ(t_targetTz, thisHr, thisMin);
-            // And now set the global time zone.
-            currentTz[0] = thisHr;
-            currentTz[1] = thisMin;
+            // Reconfigure time zones.
+            configTZ();
           }
           break;
         default:
@@ -992,7 +987,6 @@ void loadTZ(int t_tzID, int t_tzDatArray[]) {
       Serial.print(t_tzDatArray[0]);
       Serial.print(":");
       Serial.println(t_tzDatArray[1]);
-      Serial.println("Saving GMT in place of previous value.");
     #endif
 
     // Set our system-wide time zone to GMT.
@@ -1000,7 +994,7 @@ void loadTZ(int t_tzID, int t_tzDatArray[]) {
     t_tzDatArray[1] = 0;
     
     // And write GMT as the offset to EEPROM so next time we have good data.
-    saveTZ(t_tzID, 0, 0);
+    //saveTZ(t_tzID, 0, 0);
   }
 
   #ifdef DEBUGON
@@ -1115,6 +1109,9 @@ void configTZ() {
     Serial.println(tz_b[1]);
   #endif
   
+  // Set our current time zone
+  setCurrentTZ(currentTzID);
+  
   return;
 }
 
@@ -1198,7 +1195,7 @@ void setCurrentTZ(int t_tzID) {
  ******************************/
  
 // Compensate for GMT offset in hours by wrapping from 0-23 hrs, 0-59 mins, and vice versa.
-void setCurrentTime(t_tz[]) {
+void setCurrentTime() {
   // Hour carry variable to be used if we need to add or subtract an hour based on the minutes.
   int hrCarry = 0;
   
@@ -1207,8 +1204,8 @@ void setCurrentTime(t_tz[]) {
   int adjMin;
   
   // Set up variables to test with and use for adjusting the "current" time.
-  int offsetTestMin = r_min + t_tz[1];
-  int offsetTestHr = r_hr + t_tz[0];
+  int offsetTestMin = r_min + currentTz[1];
+  int offsetTestHr = r_hr + currentTz[0];
   
   #ifdef DEBUGON
     Serial.print("Adjusting ");
@@ -1216,9 +1213,9 @@ void setCurrentTime(t_tz[]) {
     Serial.print(":");
     Serial.print(r_min);
     Serial.print(" for GMT offset ");
-    Serial.print(t_tz[0]);
+    Serial.print(currentTz[0]);
     Serial.print(":");
-    Serial.println(t_tz[1]);
+    Serial.println(currentTz[1]);
   #endif
   
   // If we're out of bounds on the minute after adjusting the offset let's fix it.
