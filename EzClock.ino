@@ -590,15 +590,6 @@ void handleSetTz(int t_targetTz) {
       thisMin = 0;
     }
     
-    // Also make sure the hour and minute have the same "sign".
-    // Take the hour's sign if a conflict occurs.
-    if(thisHr * thisMin < 0) {
-      thisMin *= -1;
-    }
-
-    // Determine which color to use, and what direction to draw the hour and minute
-    // offsets.
-
     // Determine which direction we're moving.
     if(thisHr >= 0) {
       displayDir = 1;
@@ -625,7 +616,10 @@ void handleSetTz(int t_targetTz) {
     if (thisHr != 0) {
       face.setPixelColor(displayStartH + (thisHr), displayColor);
     }
-    
+    // Show the time zone offset minute as a single pixel, assuming it's > 0, with a 5 minute accuracy.
+    if (thisMin != 0) {
+      face.setPixelColor(displayStartM + ((abs(thisMin / 5)) * displayDir), displayColor);
+    }
     // Show the time zone offset.
     face.show();
   }
