@@ -151,10 +151,10 @@
 // EEPROM timezone data storage addresses
 #define TZ_A_ID      0 // GMT offset/timezone A's identifier
 #define TZ_B_ID      1 // GMT offset/timezone B's identifier
-#define EEP_TZ_HR_A  0x00 // GMT offset/timezone A, offset in hours EEPROM address.
-#define EEP_TZ_MIN_A 0x01 // GMT offset/timezone A, offset in minutes EEPROM address.
-#define EEP_TZ_HR_B  0x02 // GMT offset/timezone B, offset in hours EEPROM address.
-#define EEP_TZ_MIN_B 0x03 // GMT offset/timezone B, offset in minutes EEPROM address.
+#define EEP_TZ_HR_A  0x00 // GMT offset/timezone A, offset in hours EEPROM address, 2 bytes.
+#define EEP_TZ_MIN_A 0x02 // GMT offset/timezone A, offset in minutes EEPROM address, 2 bytes.
+#define EEP_TZ_HR_B  0x04 // GMT offset/timezone B, offset in hours EEPROM address, 2 bytes.
+#define EEP_TZ_MIN_B 0x06 // GMT offset/timezone B, offset in minutes EEPROM address, 2 bytes.
 
 /***********
  * OBJECTS *
@@ -905,6 +905,9 @@ void loadTZ(int t_tzID, int t_tzDatArray[]) {
   // Create our storage variables.
   int h_addr;
   int m_addr;
+  // Account for signed ints by using 2 bytes, not 1.
+  byte hiByte;
+  byte loByte;
 
   // Figure out which time zone we're requesting.
   switch(t_tzID) {
@@ -925,9 +928,14 @@ void loadTZ(int t_tzID, int t_tzDatArray[]) {
       break;
   }
   
-  // Read time zone data at the specified addresses.
-  t_tzDatArray[0] = EEPROM.read(h_addr);
-  t_tzDatArray[1] = EEPROM.read(m_addr);
+  // Read time zone data at the specified addresses, accouting for 2's compliment bytes.
+  // See: http://forum.arduino.cc/index.php/topic,37470.0.html
+  loByte = EEPROM.read(h_addr);
+  hiByte = EEPROM.read(h_addr + 1);
+  t_tzDatArray[0] = ((loByte << 0) & 0xFF) + ((hiByte << 8) & 0xFF00);
+  loByte = EEPROM.read(m_addr);
+  hiByte = EEPROM.read(m_addr + 1);
+  t_tzDatArray[1] = ((loByte << 0) & 0xFF) + ((hiByte << 8) & 0xFF00);
   
   // Do a quick boundary check for our read values, and if they're not
   // right due to uninitialized EEPROM or previously written EEPROM
@@ -980,6 +988,9 @@ void saveTZ(int t_tzID, int t_offsetHrs, int t_offsetMins) {
   // Create our storage variables.
   int h_addr;
   int m_addr;
+  // Account for using signed ints by using 2 bytes, not 1.
+  byte hiByte;
+  byte loByte; 
 
   // Figure out which time zone we're trying to save.
   switch(t_tzID) {
@@ -1005,8 +1016,15 @@ void saveTZ(int t_tzID, int t_offsetHrs, int t_offsetMins) {
   // If we got a good time we can write the offset data to the EEPROM
   if(goodTzID) {
     // Read time zone data at the specified addresses.
-    EEPROM.write(h_addr, t_offsetHrs);
-    EEPROM.write(m_addr, t_offsetMins);
+    loByte = ((t_offsetHrs >> 0) & 0xFF);
+    hiByte = ((t_offsetHrs >> 8) & 0xFF);
+    EEPROM.write(h_addr, loByte);
+    EEPROM.write(h_addr + 1, hiByte);
+    loByte = ((t_offsetMins >> 0) & 0xFF);
+    hiByte = ((t_offsetMins >> 8) & 0xFF);
+    EEPROM.write(m_addr, loByte);
+    EEPROM.write(m_addr + 1, hiByte);
+
   }
   
   #ifdef DEBUGON
