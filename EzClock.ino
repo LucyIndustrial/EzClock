@@ -501,13 +501,11 @@ void handleSetTz(int t_targetTz) {
   int thisTzB;
   int thisHr; // Hold the hour we want to store as TZ minute
   int thisMin; // Hold the minute we want to store as TZ minute
-  boolean setting = true;
-
-  /*
-  #define F_TZSET_PLS_R/G/B
-  #define F_TZSET_MNS_R/G/B
-  #define F_TZSET_MIN_I <- How far do we increment the minutes per keypress?
-  */
+  boolean setting = true; // Are we still setting the TZ offset?
+  int8_t displayDir; // Display TZ in CW or CCW direction? + = CW, - = CCW
+  uint8_t displayStartH; // Where do we start drawing the hour/minute marks?
+  uint8_t displayStartM;
+  uint32_t displayColor; // Hold the color we'll use depending on displayDir.
   
   // Which target timezone are we after, and what color should the indidcator LED be?
   switch(t_targetTz) {
@@ -535,17 +533,6 @@ void handleSetTz(int t_targetTz) {
       break;
   }
   
-  // First blank the clock face.
-  setFaceRange(0, F_LENGTH -1, F_DEFAULT_R, F_DEFAULT_G, F_DEFAULT_B);
-  // Draw the "zero line" for hours.
-  face.setPixelColor(F_HRSTART, F_TZSET_ZRO_R, F_TZSET_ZRO_G, F_TZSET_ZRO_B);
-  // Do the same for minutes.
-  face.setPixelColor(F_MINSTART, F_TZSET_ZRO_R, F_TZSET_ZRO_G, F_TZSET_ZRO_B);
-  // Set the seconds indicator LED to show which time zone we're setting.
-  face.setPixelColor(F_SECLSTART, thisTzR, thisTzG, thisTzB);
-  // Now show it all.
-  face.show();
-  
   // While we're setiting the time zone keep going.
   while(setting) {
     // Did we hit a button of some kind?
@@ -559,15 +546,19 @@ void handleSetTz(int t_targetTz) {
       switch(touched) {
         case T_KEY1:
           // Subtract hour
+          thisHr--;
           break;
         case T_KEY2:
           // Add hour
+          thisHr++;
           break;
         case T_KEY3:
           // Subtract minute at increment specified by F_TZSET_MIN_I
+          thisMin -= F_TZSET_MIN_I;
           break;
         case T_KEY4:
           // Add minute at increment specified by F_TZSET_MIN_I
+          thisMin += F_TZSET_MIN_I;
           break;
         case T_KEY7:
           // Cancel
@@ -581,14 +572,67 @@ void handleSetTz(int t_targetTz) {
           if (thisHr != beginningTzHr && thisMin != beginningTzMin) {
             // Save the time zone.
             saveTZ(t_targetTz, thisHr, thisMin);
+            // And now set the global time zone.
+            currentTz[0] = thisHr;
+            currentTz[1] = thisMin;
           }
           break;
         default:
-          // Don't care about anything else.
+          // Don't care about anything else pressed.
           break;
         
       }
     }
+    
+    // Boundary check the time zone data the user set
+    // This will "loop" the time as it crosses a positive or negative
+    // boundary back to zero.
+    if(thisHr < -11 || thisHr > 11) {
+      thisHr = 0;
+    }
+    
+    if(thisMin < -59 || thisMin > 59) {
+      thisMin = 0;
+    }
+    
+    // Also make sure the hour and minute have the same "sign".
+    // Take the hour's sign if a conflict occurs.
+    if(thisHr * thisMin < 0) {
+      thisMin *= -1;
+    }
+
+    // Determine which color to use, and what direction to draw the hour and minute
+    // offsets.
+
+    // Determine which direction we're moving.
+    if(thisHr >= 0) {
+      displayDir = 1;
+      displayColor = face.Color(F_TZSET_PLS_R, F_TZSET_PLS_G, F_TZSET_PLS_B);
+      displayStartH = F_HRSTART;
+      displayStartM = F_MINSTART;
+    } else {
+      displayDir = -1;
+      displayColor = face.Color(F_TZSET_MNS_R, F_TZSET_MNS_G, F_TZSET_MNS_B);
+      displayStartH = F_HRSTART + F_HRLEN;
+      displayStartM = F_MINSTART + F_MINLEN;
+    }
+    
+    // First blank the clock face.
+    setFaceRange(0, F_LENGTH -1, F_DEFAULT_R, F_DEFAULT_G, F_DEFAULT_B);
+    // Draw the "zero line" for hours.
+    face.setPixelColor(F_HRSTART, F_TZSET_ZRO_R, F_TZSET_ZRO_G, F_TZSET_ZRO_B);
+    // Do the same for minutes.
+    face.setPixelColor(F_MINSTART, F_TZSET_ZRO_R, F_TZSET_ZRO_G, F_TZSET_ZRO_B);
+    // Set the seconds indicator LED to show which time zone we're setting.
+    face.setPixelColor(F_SECLSTART, thisTzR, thisTzG, thisTzB);
+    
+    // Show the time zone offset hour as a single pixel, assuming it's > 0.
+    if (thisHr != 0) {
+      face.setPixelColor(displayStartH + (thisHr), displayColor);
+    }
+    
+    // Show the time zone offset.
+    face.show();
   }
     
   #ifdef DEBUGON
@@ -940,7 +984,7 @@ void loadTZ(int t_tzID, int t_tzDatArray[]) {
   // Do a quick boundary check for our read values, and if they're not
   // right due to uninitialized EEPROM or previously written EEPROM
   // data reset them.
-  if(t_tzDatArray[0] > 11 | t_tzDatArray[0] < -11 | t_tzDatArray[1] > 59 | t_tzDatArray[1] < -59) {
+  if(t_tzDatArray[0] > 11 || t_tzDatArray[0] < -11 || t_tzDatArray[1] > 59 || t_tzDatArray[1] < -59) {
     #ifdef DEBUGON
       Serial.print("Got invalid time zone data for ID ");
       Serial.print(t_tzID);
@@ -1015,7 +1059,7 @@ void saveTZ(int t_tzID, int t_offsetHrs, int t_offsetMins) {
   
   // If we got a good time we can write the offset data to the EEPROM
   if(goodTzID) {
-    // Read time zone data at the specified addresses.
+    // Write time zone data at the specified addresses.
     loByte = ((t_offsetHrs >> 0) & 0xFF);
     hiByte = ((t_offsetHrs >> 8) & 0xFF);
     EEPROM.write(h_addr, loByte);
@@ -1154,7 +1198,7 @@ void setCurrentTZ(int t_tzID) {
  ******************************/
  
 // Compensate for GMT offset in hours by wrapping from 0-23 hrs, 0-59 mins, and vice versa.
-void setCurrentTime(int t_tz[]) {
+void setCurrentTime(t_tz[]) {
   // Hour carry variable to be used if we need to add or subtract an hour based on the minutes.
   int hrCarry = 0;
   
