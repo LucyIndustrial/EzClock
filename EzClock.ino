@@ -19,7 +19,6 @@
 /************
  * INCLUDES *
  ************/
-
 #include <EEPROM.h> // Onboard EEPROM storage of both time zones.
 #include <Wire.h> // I2C support for RTC and cap touch sensor
 #include <SPI.h> // Required for CAP1188 touch sensor, but not used.
@@ -156,7 +155,6 @@
 #define EEP_TZ_MIN_A 0x01 // GMT offset/timezone A, offset in minutes EEPROM address.
 #define EEP_TZ_HR_B  0x02 // GMT offset/timezone B, offset in hours EEPROM address.
 #define EEP_TZ_MIN_B 0x03 // GMT offset/timezone B, offset in minutes EEPROM address.
-
 
 /***********
  * OBJECTS *
@@ -416,6 +414,8 @@ void handleMain(int t_touched) {
       // Do nothing.
       break;
   }
+  
+  return;
 }
 
 // If we're trying to turn the light on...
@@ -481,6 +481,8 @@ void handleLight() {
   #ifdef DEBUGON
     Serial.println("Done lighting.");
   #endif
+  
+  return;
 }
 
 // Set the specified timezone.
@@ -588,17 +590,17 @@ void handleSetTz(int t_targetTz) {
       }
     }
   }
-  
-  // Wait for visual debugging purposes.
-  delay(2000);
-  
+    
   #ifdef DEBUGON
     Serial.print("Timezone ID ");
     Serial.print(t_targetTz);
-    Serial.print(" is now GMT XX");
+    Serial.print(" is now GMT ");
+    Serial.print(thisHr);
     Serial.print(":");
-    Serial.println("XX");
+    Serial.println(thisMin);
   #endif
+  
+  return;
 }
 
 
@@ -631,6 +633,8 @@ void showClockFace() {
   
   // And dow the seconds animation thing
   showSecFlash();
+  
+  return;
 }
 
 // Draw the clock face.
@@ -638,6 +642,7 @@ void drawClockFace() {
   // Draw the face.
   face.show();
 
+  return;
 }
 
 // Show hour ticks at 0:00, 6:00, 12:00, and 18:00 hour marks
@@ -649,6 +654,8 @@ void showFaceHrMarks(uint32_t t_color) {
   face.setPixelColor(6, t_color);
   face.setPixelColor(12, t_color);
   face.setPixelColor(18, t_color);
+  
+  return;
 }
 
 // Show the hour..
@@ -684,6 +691,8 @@ void showFaceHr(int t_hr) {
     // Set our target pixel.
     face.setPixelColor(x_tgt, face.Color(gamma[scaledR], gamma[scaledG], gamma[scaledB]) | face.getPixelColor(x_tgt));
   }
+  
+  return;
 }
 
 // Zero out the clock's face so we can start over, but don't waste
@@ -698,6 +707,8 @@ void setFaceColor(uint32_t t_color) {
   for(int i = 0; i < F_LENGTH; i++) {
     face.setPixelColor(i, t_color);
   }
+  
+  return;
 }
 
 // Set the minute pixels.
@@ -733,6 +744,8 @@ void showFaceMin(int t_min) {
     face.setPixelColor(i + F_MINSTART, face.Color(F_MIN_R, F_MIN_G, F_MIN_B) | face.getPixelColor(i + F_MINSTART));
 
   }
+  
+  return;
 }
 
 // Set the hour pixel.
@@ -763,6 +776,8 @@ void showFaceSec(int t_sec) {
     face.setPixelColor(i + F_SECSTART, face.Color(F_SEC_R, F_SEC_G, F_SEC_B) | face.getPixelColor(i + F_SECSTART));
 
   }
+  
+  return;
 }
 
 // Show a little flash when we register a new second.
@@ -818,6 +833,7 @@ void showSecFlash() {
     delay(F_SECL_DELAY);
   }
 
+  return;
 }
 
 // Set a range of pixels
@@ -834,6 +850,8 @@ void setFaceRange(int t_first, int t_last, int t_r, int t_g, int t_b) {
     // Assign the current pixel the color.
     face.setPixelColor(i, t_r, t_g, t_b);
   }
+  
+  return;
 }
 
 
@@ -863,6 +881,8 @@ void getRTCTime() {
     Serial.print(":");
     Serial.println(r_sec);
   #endif
+  
+  return;
 }
 
 // Get out touched keys.
@@ -940,7 +960,7 @@ void loadTZ(int t_tzID, int t_tzDatArray[]) {
     Serial.println(t_tzDatArray[1]);
   #endif
 
-  // Supposedly this should work (via http://forum.arduino.cc/index.php?topic=40644.0)
+  return;
 }
 
 // Ssve time zone offset data.
@@ -997,6 +1017,8 @@ void saveTZ(int t_tzID, int t_offsetHrs, int t_offsetMins) {
     Serial.print(":");
     Serial.println(t_offsetMins);
   #endif
+  
+  return;
 }
 
 // This is called on boot to grab the timezone from EEPROM.
@@ -1030,6 +1052,8 @@ void configTZ() {
     Serial.print(":");
     Serial.println(tz_b[1]);
   #endif
+  
+  return;
 }
 
 
@@ -1050,6 +1074,8 @@ void configTouch() {
   cap.writeRegister(0x2A, 0x00); // Allow multiple touches because the diagnostic LEDs look cool.
   cap.writeRegister(0x41, 0x40); // "Speedup" off.
   cap.writeRegister(0x44, 0x41); // Set interrupt on press but not release?
+  
+  return;
 }
 
 // Configure the RTC.
@@ -1065,6 +1091,8 @@ void configRTC() {
   rtc.BBSQWEnable(false);
   // Set our IRQ frequency at 1Hz (one pulse per second)
   rtc.SQWFrequency(RTC_SQW_FREQ);
+  
+  return;
 }
 
 // Set active time zone.
@@ -1098,6 +1126,8 @@ void setCurrentTZ(int t_tzID) {
       // do nothing.
       break;
   }
+  
+  return;
 }
 
 
@@ -1175,6 +1205,8 @@ void setCurrentTime(int t_tz[]) {
   // Now update the time we were fed.
   currentHr = adjHr;
   currentMin = adjMin;
+  
+  return;
 }
 
  
@@ -1186,6 +1218,8 @@ void setCurrentTime(int t_tz[]) {
 void setTIrqFlag() {
   // Set the flag
   t_IrqFlag = 1;
+  
+  return;
 }
 
 // Clear the touch IRQ flag and reset the IRQ on the sensor.
@@ -1200,6 +1234,8 @@ void clearTIRQ() {
   // Clear the INT bit on the main configuration register,
   // leaving the rest of the register in tact.
   cap.writeRegister(0x00, cap.readRegister(0x00) & 0xFE);
+  
+  return;
 }
 
 // Check the touch IRQ
@@ -1214,12 +1250,16 @@ void setRIrqFlag() {
   // ticks one second.
   // Set the flag
   r_IrqFlag = 1;
+  
+  return;
 }
 
 // Clear the RTC IRQ flag.
 void clearRIRQ() {
   // Clear the RTC IRQ flag.
   r_IrqFlag = 0;
+  
+  return;
 }
 
 // Check the RTC IRQ
