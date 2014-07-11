@@ -603,6 +603,9 @@ void handleSetTz(int t_targetTz) {
       displayStartM = F_MINSTART + F_MINLEN;
     }
     
+    // Make sure the minute's sign matches the hour sign.
+    thisMin = abs(thisMin) * displayDir;
+    
     // First blank the clock face.
     setFaceRange(0, F_LENGTH -1, F_DEFAULT_R, F_DEFAULT_G, F_DEFAULT_B);
     // Draw the "zero line" for hours.
@@ -614,11 +617,15 @@ void handleSetTz(int t_targetTz) {
     
     // Show the time zone offset hour as a single pixel, assuming it's > 0.
     if (thisHr != 0) {
-      face.setPixelColor(displayStartH + (thisHr), displayColor);
+      for(uint8_t i = 0; i < abs(thisHr); i++) {
+        face.setPixelColor(displayStartH + thisHr + (i * displayDir), displayColor);
+      }
     }
     // Show the time zone offset minute as a single pixel, assuming it's > 0, with a 5 minute accuracy.
     if (thisMin != 0) {
-      face.setPixelColor(displayStartM + ((abs(thisMin / 5)) * displayDir), displayColor);
+      for(uint8_t i = 0; i < abs(thisMin / 5); i++) {
+        face.setPixelColor(displayStartM + (thisMin / 5) + (i * displayDir), displayColor);
+      }
     }
     // Show the time zone offset.
     face.show();
