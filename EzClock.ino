@@ -594,13 +594,13 @@ void handleSetTz(int t_targetTz) {
     if(thisHr >= 0) {
       displayDir = 1;
       displayColor = face.Color(F_TZSET_PLS_R, F_TZSET_PLS_G, F_TZSET_PLS_B);
-      displayStartH = F_HRSTART;
-      displayStartM = F_MINSTART;
+      displayStartH = F_HRSTART + 1; // Start counting one pixel after the first LED on the HRs region, since we have a zero marker.
+      displayStartM = F_MINSTART + 1; // Do the same thing on the minutes.
     } else {
       displayDir = -1;
       displayColor = face.Color(F_TZSET_MNS_R, F_TZSET_MNS_G, F_TZSET_MNS_B);
-      displayStartH = F_HRSTART + F_HRLEN;
-      displayStartM = F_MINSTART + F_MINLEN;
+      displayStartH = F_HRSTART + F_HRLEN - 1; // Start at the last pixel on the HRs region.
+      displayStartM = F_MINSTART + F_MINLEN - 1; // Do the same with the minutes.
     }
     
     // Make sure the minute's sign matches the hour sign.
@@ -618,13 +618,13 @@ void handleSetTz(int t_targetTz) {
     // Show the time zone offset hour as a single pixel, assuming it's > 0.
     if (thisHr != 0) {
       for(uint8_t i = 0; i < abs(thisHr); i++) {
-        face.setPixelColor(displayStartH + thisHr + (i * displayDir), displayColor);
+        face.setPixelColor(displayStartH + (i * displayDir), displayColor);
       }
     }
     // Show the time zone offset minute as a single pixel, assuming it's > 0, with a 5 minute accuracy.
     if (thisMin != 0) {
       for(uint8_t i = 0; i < abs(thisMin / 5); i++) {
-        face.setPixelColor(displayStartM + (thisMin / 5) + (i * displayDir), displayColor);
+        face.setPixelColor(displayStartM  + (i * displayDir), displayColor);
       }
     }
     // Show the time zone offset.
