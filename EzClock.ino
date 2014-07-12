@@ -646,6 +646,26 @@ void handleSetTz(int t_targetTz) {
   return;
 }
 
+// This is how we set the RTC.
+void handleSetRtc() {
+  boolean setting = true; // Are we setting the RTC?
+  int setHr = r_hr; // Set our initial hour to the RTC's hour value.
+  int setMin = r_min; // Set our initial minute to the RTC's minute value.
+  int setSec = r_sec; // Soute our initial second to the RTC's second value.
+  
+  // Now we start seting the RTC.
+  while(setting) {
+    // Break out beause this is a dummy function so far.
+    setting = false;
+  }
+  
+  #ifdef DEBUGON
+    Serial.print("User setting RTC.");
+  #endif
+  
+  return;
+}
+
 
 /************************
  * CLOCK FACE FUNCTIONS *
