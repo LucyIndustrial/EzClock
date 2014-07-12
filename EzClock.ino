@@ -655,8 +655,45 @@ void handleSetRtc() {
   
   // Now we start seting the RTC.
   while(setting) {
-    // Break out beause this is a dummy function so far.
-    setting = false;
+    // Did we hit a button of some kind?
+    if(checkTIRQ()) {
+      // Grab the state of the touched keys before clearing the IRQ.
+      uint8_t touched = getTouched();
+      // Clear the touch IRQ since we're handling it now.
+      clearTIRQ();
+      
+      // Determine which key we just pressed, and what to do.
+      switch(touched) {
+        case T_KEY1:
+          // Subtract hour
+          break;
+        case T_KEY2:
+          // Add hour
+          break;
+        case T_KEY3:
+          // Subtract minute
+          break;
+        case T_KEY4:
+          // Add minute
+          break;
+        case T_KEY5:
+          // Reset seconds to zero.
+          break;
+        case T_KEY7:
+          // Cancel
+          // Break out of the loop, don't set RTC.
+          setting = false;
+          break;
+        case T_KEY8:
+          // Set RTC, and break out of the loop.
+          setting = false;
+          break;
+        default:
+          // Don't care about anything else pressed.
+          break;
+        
+      }
+    }
   }
   
   #ifdef DEBUGON
