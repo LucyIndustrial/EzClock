@@ -406,6 +406,7 @@ void handleMain(int t_touched) {
     // Set the system UTC time.
     case T_KEY8:
       // Change the UTC time.
+      handleSetRtc();
       break;
 
     // If anything else came through we don't care.
@@ -653,6 +654,10 @@ void handleSetRtc() {
   int setMin = r_min; // Set our initial minute to the RTC's minute value.
   int setSec = r_sec; // Soute our initial second to the RTC's second value.
   
+  #ifdef DEBUGON
+    Serial.print("User setting RTC.");
+  #endif
+  
   // Now we start seting the RTC.
   while(setting) {
     // Did we hit a button of some kind?
@@ -666,18 +671,23 @@ void handleSetRtc() {
       switch(touched) {
         case T_KEY1:
           // Subtract hour
+          setHr--;
           break;
         case T_KEY2:
           // Add hour
+          setHr++;
           break;
         case T_KEY3:
           // Subtract minute
+          setMin--;
           break;
         case T_KEY4:
           // Add minute
+          setMin++;
           break;
         case T_KEY5:
           // Reset seconds to zero.
+          setSec = 0;
           break;
         case T_KEY7:
           // Cancel
@@ -686,20 +696,66 @@ void handleSetRtc() {
           break;
         case T_KEY8:
           // Set RTC, and break out of the loop.
+          setRTCTime(setHr, setMin, setSec);
           setting = false;
           break;
         default:
           // Don't care about anything else pressed.
           break;
-        
+      }
+      
+      // Boundary check the time zone data the user set
+      // This will "loop" the time as it crosses a positive or negative
+      // boundary back to zero.
+      if(setHr < 0 || setHr > 23) {
+        setHr = 0;
+      }
+      
+      if(setMin < 0 || setMin > 59) {
+        setMin = 0;
       }
     }
+  
+    if(setSec < 0 || setSec > 60) {
+      setSec = 0;
+    }
+    
+    // If we got an IRQ from the clock...
+    if (checkRIRQ()) {
+      #ifdef DEBUGON
+        Serial.println("Got RTC IRQ.");
+      #endif
+    
+      // Keep track of our seconds.
+      setSec++;
+
+      // Seconds boundary check
+      if(setSec < 0 || setSec > 60) {
+        setSec = 0;
+      }
+      
+      // Clear the IRQ flag since we're handling it now.
+      clearRIRQ();
+   
+      // Get the new time value from the RTC.
+      getRTCTime();
+
+      // Blank the clock.
+      setFaceColor(faceDefColor);
+  
+      // Display hour marks.
+      showFaceHrMarks(hrMarkColor);
+      // Display our hours
+      showFaceHr(setHr);
+      // Show our minutes
+      showFaceMin(setMin);
+      // Show our seconds.
+      showFaceSec(setSec);
+  
+      // Draw the clock face since we have all the relevant stuff ready.
+      drawClockFace();
+    }
   }
-  
-  #ifdef DEBUGON
-    Serial.print("User setting RTC.");
-  #endif
-  
   return;
 }
 
@@ -987,7 +1043,7 @@ void getRTCTime() {
 
 
 // Set the RTC's time
-void setRTCTime(uint8_t t_hr, uint8_t t_min, uint8 t_sec) {
+void setRTCTime(uint8_t t_hr, uint8_t t_min, uint8_t t_sec) {
   
   #ifdef DEBUGON
     Serial.print("Set RTC time: ");
@@ -1001,7 +1057,7 @@ void setRTCTime(uint8_t t_hr, uint8_t t_min, uint8 t_sec) {
   // Set the RTC to have the time we specified, but since we
   // aren't actually using the date for this application I just
   // set a date.
-  RTC.adjust(DateTime(R_BASETIME + (t_hr * 60 * 60) + (t_min * 60) + t_sec));
+  rtc.adjust(DateTime(R_BASETIME + (t_hr * 60 * 60) + (t_min * 60) + t_sec));
 
   return;
 }
