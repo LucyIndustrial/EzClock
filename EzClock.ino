@@ -33,11 +33,11 @@
  ***********/
 
 // To debug, or not debug? That is the question.
-#define DEBUGON
+//#define DEBUGON
 
 // Are we compiling for a Flora or the test UNO?
 // Comment out the following #define for an UNO.
-//#define USINGFLORA
+#define USINGFLORA
 
 // Touch interface config
 #define T_KEY1        0x01
