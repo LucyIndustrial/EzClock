@@ -156,8 +156,6 @@
 #define EEP_TZ_HR_B  0x04 // GMT offset/timezone B, offset in hours EEPROM address, 2 bytes.
 #define EEP_TZ_MIN_B 0x06 // GMT offset/timezone B, offset in minutes EEPROM address, 2 bytes.
 
-// RTC stuff.
-#define R_BASETIME   1380697200 // Use this for a base time when setting the time on the RTC.
 
 /***********
  * OBJECTS *
@@ -707,13 +705,30 @@ void handleSetRtc() {
       // Boundary check the time zone data the user set
       // This will "loop" the time as it crosses a positive or negative
       // boundary back to zero.
-      if(setHr < 0 || setHr > 23) {
+      if(setHr < 0) {
+        setHr = 23;
+      }
+      
+      if(setHr > 23) {
         setHr = 0;
       }
       
-      if(setMin < 0 || setMin > 59) {
+      // Setting loop minute setting.
+      if(setMin < 0) {
+        setMin = 59;
+      }
+      if(setMin > 59) {
         setMin = 0;
       }
+      
+      #ifdef DEBUGON
+        Serial.print("Current set time: ");
+        Serial.print(setHr);
+        Serial.print(":");
+        Serial.print(setMin);
+        Serial.print(":");
+        Serial.println(setSec);
+      #endif
     }
   
     if(setSec < 0 || setSec > 60) {
@@ -1057,7 +1072,7 @@ void setRTCTime(uint8_t t_hr, uint8_t t_min, uint8_t t_sec) {
   // Set the RTC to have the time we specified, but since we
   // aren't actually using the date for this application I just
   // set a date.
-  rtc.adjust(DateTime(R_BASETIME + (t_hr * 60 * 60) + (t_min * 60) + t_sec));
+  rtc.adjust(DateTime(2013, 10, 2, t_hr, t_min, t_sec));
 
   return;
 }
