@@ -84,7 +84,7 @@
 // Start-up animation
 #define F_STARTUP_R   0 // Startup animation R/G/B values
 #define F_STARTUP_G   90
-#define F_STARTUP_B   10
+#define F_STARTUP_B   20
 #define F_STARTUP_DLY 100 // Startup animation speed.
 #define F_STARTUP_ENA // If we don't want a startup animation comment this out.
 
@@ -794,6 +794,52 @@ void handleSetRtc() {
 // Start-up animation, if enabled.
 #ifdef F_STARTUP_ENA
 void showStartAnim() {
+  /*#define F_STARTUP_R   0 // Startup animation R/G/B values
+  #define F_STARTUP_G   90
+  #define F_STARTUP_B   10
+  #define F_STARTUP_DLY 100 // Startup animation speed.*/
+  //FINDME
+
+  // First blank the clock face.
+  setFaceRange(0, F_LENGTH -1, F_DEFAULT_R, F_DEFAULT_G, F_DEFAULT_B);
+
+  // This is done the hard way to conserve RAM.
+  // Step 1
+  face.setPixelColor(F_SECLSTART, F_STARTUP_R, F_STARTUP_G, F_STARTUP_B);
+  face.show();
+  delay(F_STARTUP_DLY);
+
+  // Step 2
+  face.setPixelColor(F_SECLSTART, F_DEFAULT_R, F_DEFAULT_G, F_DEFAULT_B);
+  setFaceRange(F_MINSTART, (F_MINSTART + F_MINLEN) - 1,  F_STARTUP_R, F_STARTUP_G, F_STARTUP_B);
+  face.show();
+  delay(F_STARTUP_DLY);
+  
+  // Step 3
+  face.setPixelColor(F_SECLSTART, F_STARTUP_R, F_STARTUP_G, F_STARTUP_B);
+  setFaceRange(F_MINSTART, (F_MINSTART + F_MINLEN) - 1,  F_DEFAULT_R, F_DEFAULT_G, F_DEFAULT_B);
+  setFaceRange(F_HRSTART, F_HRLEN - 1, F_STARTUP_R, F_STARTUP_G, F_STARTUP_B);
+  face.show();
+  delay(F_STARTUP_DLY);
+
+  // Step 4
+  face.setPixelColor(F_SECLSTART, F_DEFAULT_R, F_DEFAULT_G, F_DEFAULT_B);
+  setFaceRange(F_MINSTART, (F_MINSTART + F_MINLEN) - 1, F_STARTUP_R, F_STARTUP_G, F_STARTUP_B);
+  setFaceRange(F_HRSTART, F_HRLEN - 1, F_DEFAULT_R, F_DEFAULT_G, F_DEFAULT_B);
+  face.show();
+  delay(F_STARTUP_DLY);
+
+  // Step 5
+  face.setPixelColor(F_SECLSTART, F_DEFAULT_R, F_DEFAULT_G, F_DEFAULT_B);
+  setFaceRange(F_MINSTART, (F_MINSTART + F_MINLEN) - 1, F_DEFAULT_R, F_DEFAULT_G, F_DEFAULT_B);
+  setFaceRange(F_HRSTART, F_HRLEN - 1, F_STARTUP_R, F_STARTUP_G, F_STARTUP_B);
+  face.show();
+  delay(F_STARTUP_DLY);
+  
+  // Blank it again before showing the clock face.
+  setFaceRange(0, F_LENGTH -1, F_DEFAULT_R, F_DEFAULT_G, F_DEFAULT_B);
+  face.show();
+  delay(F_STARTUP_DLY);
 
 }
 #endif
