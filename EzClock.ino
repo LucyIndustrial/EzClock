@@ -81,6 +81,14 @@
 // Clock face config - Part of this assumes pixels are hooked up like hr -> min -> sec
 #define F_LENGTH      37 // How many NeoPixels do we have in the face?
 
+// Start-up animation
+#define F_STARTUP_R   0 // Startup animation R/G/B values
+#define F_STARTUP_G   90
+#define F_STARTUP_B   10
+#define F_STARTUP_DLY 100 // Startup animation speed.
+#define F_STARTUP_ENA // If we don't want a startup animation comment this out.
+
+// Default clock face color.
 #define F_DEFAULT_R   0 // The "background" color for the clock face.
 #define F_DEFAULT_G   0
 #define F_DEFAULT_B   0
@@ -312,6 +320,11 @@ void setup() {
   //Start the clock face up, and it will be zeroed out.
   face.begin();
   face.show();
+  
+  // Show our startup animation, if enabled.
+  #ifdef F_STARTUP_ENA
+  showStartAnim();
+  #endif
 
   #ifdef DEBUGON
     Serial.println("Leaving setup()...");
@@ -778,6 +791,13 @@ void handleSetRtc() {
 /************************
  * CLOCK FACE FUNCTIONS *
  ************************/
+// Start-up animation, if enabled.
+#ifdef F_STARTUP_ENA
+void showStartAnim() {
+
+}
+#endif
+ 
 // Show the clock face.
 void showClockFace() {
   // Seconds will be an interrupt-driven animation
