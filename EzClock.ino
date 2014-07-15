@@ -33,11 +33,11 @@
  ***********/
 
 // To debug, or not debug? That is the question.
-//#define DEBUGON
+#define DEBUGON
 
 // Are we compiling for a Flora or the test UNO?
 // Comment out the following #define for an UNO.
-#define USINGFLORA
+// #define USINGFLORA
 
 // Touch interface config
 #define T_KEY1        0x01
@@ -1380,7 +1380,7 @@ void setCurrentTime() {
     if (offsetTestMin > 59) {
       adjMin = offsetTestMin - 59;
       // Also carry an hour because we just rolled up one hour.
-      hrCarry++;
+      //hrCarry++;
     } else {
       // It's too small so let's add 59 seconds.
       adjMin = offsetTestMin + 59;
